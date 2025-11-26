@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <title>Worksy – Research</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <!-- page-scoped styles -->
+    <style>
+      /* Chat bubbles for answers */
+      #answer {
+        list-style: none;
+        padding: 0;
+        margin: 12px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      #answer li {
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        max-width: 95%;
+      }
+      #answer li.user {
+        align-self: flex-end;
+        background: rgba(34, 211, 238, 0.1);
+      }
+      #answer li.assistant {
+        background: rgba(96, 165, 250, 0.08);
+      }
+
+      /* Viewer container */
+      #viewer {
+        position: relative;
+      }
+    </style>
+    <script src="/theme.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <nav class="nav">
+        <a class="brand" href="/index.html">
+          <img src="/logo.svg" alt="Worksy AI logo" onerror="this.remove()" />
+          <span class="brand-text">
+            <span class="brand-name">Worksy AI</span>
+            <span class="brand-slogan">Work easy with Worksy</span>
+          </span>
+        </a>
+        <div class="links">
+          <a href="/index.html">Chat</a>
+          <a href="/lectures.html">Lectures</a>
+          <a href="/research.html" class="active">Research</a>
+          <a href="/admin.html">Admin</a>
+          <button id="themeToggle" class="themebtn" type="button">☾</button>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="card">
+        <div class="card-head">
+          <h1>Research</h1>
+          <div id="status" class="muted">Idle</div>
+        </div>
+
+        <!-- Search bar -->
+        <form id="qform" class="row" autocomplete="off">
+          <input
+            id="q"
+            type="search"
+            placeholder="Search papers, DOIs, arXiv IDs…"
+          />
+          <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+      </section>
+
+      <section class="grid">
+        <!-- Results list -->
+        <div class="card">
+          <h2>Results</h2>
+          <ul id="results" class="list" style="margin-top: 8px"></ul>
+        </div>
+
+        <!-- Preview / Viewer -->
+        <div class="card">
+          <h2 id="paperTitle" class="title">Select a result</h2>
+          <div id="meta" class="muted" style="margin: 6px 0 8px"></div>
+          <p id="abstract" class="muted"></p>
+
+          <h3 style="margin-top: 12px">Viewer</h3>
+          <div class="row" style="margin: 6px 0">
+            <button id="prevPage" class="btn" type="button">Prev</button>
+            <span id="pageInfo" class="muted">–/–</span>
+            <button id="nextPage" class="btn" type="button">Next</button>
+            <button id="openPdfBtn" class="btn" type="button">
+              Open Source
+            </button>
+          </div>
+
+          <div
+            id="viewer"
+            style="
+              position: relative;
+              display: grid;
+              place-items: center;
+              min-height: 70vh;
+              background: linear-gradient(180deg, var(--card), var(--elev));
+              border: 1px solid var(--border);
+              border-radius: 12px;
+              overflow: auto;
+            "
+          >
+            <canvas
+              id="pdfCanvas"
+              style="max-width: 100%; height: auto"
+            ></canvas>
+          </div>
+
+          <div class="row" style="margin-top: 12px">
+            <button
+              id="summariseBtn"
+              class="btn"
+              type="button"
+              title="Quick summary"
+            >
+              Summarise
+            </button>
+          </div>
+
+          <!-- extracted text (or summary bullets) -->
+          <pre
+            id="pdfText"
+            class="list-item"
+            style="
+              white-space: pre-wrap;
+              margin-top: 8px;
+              max-height: 30vh;
+              overflow: auto;
+            "
+          ></pre>
+
+          <div class="row" style="margin-top: 12px">
+            <select id="style">
+              <option value="harvard">Harvard (UoL)</option>
+              <option value="vancouver">Vancouver</option>
+            </select>
+            <button id="citeBtn" class="btn" type="button">Cite</button>
+            <button id="addBibBtn" class="btn" type="button">
+              Add to bibliography
+            </button>
+            <button id="copyBibBtn" class="btn" type="button">
+              Copy bibliography
+            </button>
+          </div>
+          <ul id="bib" class="list" style="margin-top: 8px"></ul>
+
+          <h3 style="margin-top: 16px">Ask about this paper</h3>
+          <div
+            class="row"
+            style="margin-top: 6px; align-items: stretch; gap: 8px"
+          >
+            <textarea
+              id="question"
+              rows="2"
+              placeholder="Ask a question… (Enter to send, Shift+Enter for a new line)"
+              style="min-height: 48px; resize: vertical; flex: 1"
+            ></textarea>
+            <button id="askBtn" class="btn btn-primary" type="button">
+              Send
+            </button>
+          </div>
+          <ul id="answer" class="list" style="margin-top: 8px"></ul>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="/research.js"></script>
+  </body>
+</html>

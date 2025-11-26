@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Worksy AI — Sign in</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="icon" href="/assets/generated-icon.png" />
+    <style>
+      /* background glow */
+      body {
+        background:
+          radial-gradient(
+            1200px 600px at 10% -10%,
+            rgba(34, 211, 238, 0.1),
+            transparent 40%
+          ),
+          radial-gradient(
+            900px 600px at 100% 0%,
+            rgba(96, 165, 250, 0.1),
+            transparent 30%
+          ),
+          var(--bg);
+      }
+
+      /* center card */
+      .wrap {
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+      .card-lg {
+        width: min(520px, 96vw);
+        background: var(--surface-1);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 22px 20px;
+        box-shadow: var(--shadow);
+      }
+
+      /* brand (bigger) */
+      .brand-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+        text-decoration: none;
+        color: inherit;
+      }
+      .brand-logo {
+        width: 44px;
+        height: 44px;
+      }
+      .brand-text {
+        line-height: 1.1;
+        display: flex;
+        flex-direction: column;
+      }
+      .brand-text .name {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+      }
+      .brand-text .tag {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      /* heading row */
+      .hdr {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 6px 0 2px;
+      }
+      .badge-ico {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--border);
+        background: linear-gradient(
+          180deg,
+          color-mix(in hsl, var(--card) 92%, transparent),
+          color-mix(in hsl, var(--elev) 92%, transparent)
+        );
+        font-size: 20px;
+      }
+      h1.title {
+        margin: 0;
+        font-size: 26px;
+        font-weight: 800;
+      }
+      p.sub {
+        margin: 2px 0 12px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      /* form */
+      .row {
+        display: grid;
+        gap: 12px;
+      }
+      label {
+        font-size: 13px;
+        display: grid;
+        gap: 6px;
+      }
+      .input-wrap {
+        position: relative;
+      }
+      .input-wrap input[type="password"],
+      .input-wrap input[type="text"] {
+        width: 100%;
+        padding-right: 50px;
+      }
+      .eye {
+        position: absolute;
+        right: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--surface-1);
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+      }
+      .eye:hover {
+        box-shadow: 0 0 0 3px var(--ring);
+      }
+
+      .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 2px;
+      }
+      .hint {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 6px;
+      }
+      #err {
+        color: #ffb3b3;
+      }
+
+      /* footer */
+      .foot {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 12px;
+      }
+      .link {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      .link:hover {
+        text-decoration: underline;
+      }
+
+      @media (max-width: 480px) {
+        .brand-logo {
+          width: 36px;
+          height: 36px;
+        }
+        .brand-text .name {
+          font-size: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section
+        class="card-lg"
+        role="dialog"
+        aria-labelledby="title"
+        aria-modal="true"
+      >
+        <a class="brand-row" href="/login.html">
+          <img
+            src="/logo.svg"
+            alt="Worksy"
+            class="brand-logo"
+            onerror="this.style.display='none'"
+          />
+          <span class="brand-text">
+            <span class="name">Worksy AI</span>
+            <span class="tag">Work easy with Worksy</span>
+          </span>
+        </a>
+
+        <div class="hdr">
+          <div class="badge-ico">🔒</div>
+          <div>
+            <h1 id="title" class="title">Sign in</h1>
+            <p class="sub">Enter the access password to continue.</p>
+          </div>
+        </div>
+
+        <form id="loginForm" class="row" autocomplete="off">
+          <label
+            >Password
+            <span class="input-wrap">
+              <input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                required
+              />
+              <button
+                type="button"
+                id="toggleEye"
+                class="eye"
+                aria-label="Show password"
+              >
+                👁️
+              </button>
+            </span>
+          </label>
+
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">Sign in</button>
+          </div>
+
+          <p id="err" class="hint" role="status" aria-live="polite"></p>
+        </form>
+
+        <div class="foot">
+          <span class="hint"
+            >Forgot the access password? Contact your module lead.</span
+          >
+          <a class="link" href="/health" target="_blank" rel="noopener"
+            >System status</a
+          >
+        </div>
+      </section>
+    </main>
+
+    <script type="module">
+      const form = document.querySelector("#loginForm");
+      const pwd = document.querySelector("#password");
+      const err = document.querySelector("#err");
+      const eye = document.querySelector("#toggleEye");
+
+      // Toggle password visibility
+      eye.addEventListener("click", () => {
+        const show = pwd.type === "password";
+        pwd.type = show ? "text" : "password";
+        eye.textContent = show ? "🙈" : "👁️";
+        eye.setAttribute(
+          "aria-label",
+          show ? "Hide password" : "Show password",
+        );
+        pwd.focus();
+      });
+
+      // Submit
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        err.textContent = "";
+        const r = await fetch("/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: pwd.value }),
+        });
+        if (r.ok) {
+          location.href = "/";
+        } else {
+          const j = await r.json().catch(() => ({}));
+          err.textContent = j.error || "Sign-in failed";
+          pwd.value = "";
+          pwd.focus();
+        }
+      });
+    </script>
+  </body>
+</html>

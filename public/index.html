@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Worksy AI</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script defer src="/theme.js"></script>
+    <style>
+      /* make bullets show one per line */
+      #msgs li {
+        white-space: pre-wrap;
+      }
+
+      /* clean, minimal modal */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+      .modal-backdrop.show {
+        display: flex;
+      }
+      .modal {
+        width: min(680px, 92vw);
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: var(--shadow);
+      }
+      .modal h3 {
+        margin: 0 0 8px;
+      }
+      .modal .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .modal .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .modal label {
+        font-size: 14px;
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+      }
+      .modal input[type="text"] {
+        width: 100%;
+      }
+      @media (max-width: 700px) {
+        .modal .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Top nav -->
+    <header>
+      <nav class="nav">
+        <a class="brand" href="/index.html">
+          <img
+            src="/logo.svg"
+            alt="Worksy AI logo"
+            onerror="this.style.display='none'"
+          />
+          <span class="brand-text">
+            <span class="brand-name">Worksy AI</span>
+            <span class="brand-slogan">Work easy with Worksy</span>
+          </span>
+        </a>
+        <div class="links">
+          <a class="active" href="/index.html">Chat</a>
+          <a href="/lectures.html">Lectures</a>
+          <a href="/research.html">Research</a>
+          <a href="/admin.html">Admin</a>
+          <a class="nav-link" href="/auth/logout" title="Sign out">Sign out</a>
+          <button
+            id="themeToggle"
+            class="themebtn"
+            title="Toggle theme"
+            aria-label="Toggle theme"
+          >
+            ☾
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <!-- Hero -->
+      <section class="card hero-wrap">
+        <div class="hero">
+          <div class="hero-left">
+            <p class="badge">
+              Amber-mode academic assistant • logs • caps • integrity
+            </p>
+            <h1 class="title-xl">
+              Worksy <span class="gradient-text">AI</span>
+            </h1>
+            <p class="slogan-under">Work easy with Worksy</p>
+            <p class="subtitle">
+              A policy-aligned AI workspace for students. Upload lectures, read
+              papers in-app, ask focused questions, and export an AI Index for
+              submission.
+            </p>
+            <div class="cta">
+              <a class="btn btn-primary" href="#chat">Start Chat</a>
+              <a class="btn" href="/lectures.html">Upload Lectures</a>
+              <a class="btn" href="/research.html">Open Research</a>
+            </div>
+          </div>
+          <div class="hero-side"></div>
+        </div>
+      </section>
+
+      <!-- Chat -->
+      <section id="chat" class="card chat-wrap">
+        <div class="chat-head">
+          <h2>Chat (Amber Mode)</h2>
+          <div id="cap" class="cap muted">Loading session…</div>
+        </div>
+
+        <div class="policy small">
+          Amber policy: bullet-point scaffolding only; no ghost-writing or
+          “humanising” AI text.
+          <a class="link" href="/privacy.html" target="_blank" rel="noopener"
+            >Privacy</a
+          >
+          •
+          <a class="link" href="/terms.html" target="_blank" rel="noopener"
+            >Terms</a
+          >
+        </div>
+
+        <ul id="msgs" aria-live="polite"></ul>
+
+        <form id="send" class="row" autocomplete="off">
+          <input
+            id="input"
+            placeholder="Ask something…"
+            autocomplete="off"
+            aria-label="Message"
+          />
+          <button type="submit" class="btn btn-primary">Send</button>
+          <button
+            id="makeIndex"
+            type="button"
+            class="btn"
+            title="Generate AI Index (PDF)"
+          >
+            AI Index
+          </button>
+          <button
+            id="submitBtn"
+            type="button"
+            class="btn"
+            title="Submit & lock this session"
+          >
+            Submit &amp; Lock
+          </button>
+        </form>
+
+        <p class="muted">
+          Replies are concise, in bullets, and logged for your AI Index. Once
+          you press <strong>Submit &amp; Lock</strong>, the session locks and AI
+          access is disabled for this assignment.
+        </p>
+      </section>
+    </main>
+
+    <!-- AI Declaration Modal -->
+    <div id="declBackdrop" class="modal-backdrop" aria-hidden="true">
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="declTitle"
+      >
+        <h3 id="declTitle">AI Use Declaration (Amber-mode)</h3>
+        <p class="muted">
+          Tick all boxes to confirm correct use for this assignment.
+        </p>
+
+        <div class="grid" style="margin: 8px 0 4px">
+          <label
+            ><input type="checkbox" id="d_onlyWorksy" /> Worksy was the only AI
+            tool I used (except Grammarly/Canva).</label
+          >
+          <label
+            ><input type="checkbox" id="d_noGhost" /> I did not copy, paraphrase
+            or “humanise” AI text into my submission.</label
+          >
+          <label
+            ><input type="checkbox" id="d_independent" /> The final submission
+            is my own independent work.</label
+          >
+          <label
+            ><input type="checkbox" id="d_understand" /> I understand
+            non-compliance = academic malpractice.</label
+          >
+        </div>
+
+        <div class="grid" style="margin: 6px 0">
+          <label
+            >Assignment ID (e.g., <code>239012562_BS2016</code>)
+            <input
+              id="d_assgn"
+              type="text"
+              placeholder="StudentID_ModuleCode"
+            />
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="declCancel" class="btn">Cancel</button>
+          <button id="declConfirm" class="btn btn-primary">
+            Submit &amp; Lock
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

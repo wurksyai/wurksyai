@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Worksy Admin</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/theme.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <nav class="nav">
+        <a class="brand" href="/index.html">
+          <img src="/logo.svg" alt="Worksy AI logo" onerror="this.remove()" />
+          <span class="brand-text">
+            <span class="brand-name">Worksy AI</span>
+            <span class="brand-slogan">Work easy with Worksy</span>
+          </span>
+        </a>
+        <div class="links">
+          <a href="/index.html">Chat</a>
+          <a href="/lectures.html">Lectures</a>
+          <a href="/research.html">Research</a>
+          <a href="/admin.html" class="active">Admin</a>
+          <button id="themeToggle" class="themebtn" type="button">☾</button>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="card">
+        <div class="card-head">
+          <h1>Admin Dashboard</h1>
+          <div id="status" class="muted">Idle</div>
+        </div>
+
+        <div class="row" style="flex-wrap: wrap; gap: 8px">
+          <input id="adminKey" type="text" placeholder="ADMIN_KEY" />
+          <button id="saveKey" class="btn" type="button">Save</button>
+
+          <input id="fromDate" type="date" />
+          <input id="toDate" type="date" />
+          <input id="query" type="search" placeholder="Search session ID…" />
+          <select id="pageSize">
+            <option>25</option>
+            <option selected>50</option>
+            <option>100</option>
+            <option>200</option>
+          </select>
+          <button id="loadSessions" class="btn btn-primary" type="button">
+            Load
+          </button>
+          <label
+            class="muted"
+            style="display: flex; align-items: center; gap: 6px"
+          >
+            <input id="autoRefresh" type="checkbox" />
+            Auto-refresh
+          </label>
+          <button
+            id="bulkExport"
+            class="btn"
+            type="button"
+            title="ZIP with CSV + AI Index PDFs"
+          >
+            Bulk Export
+          </button>
+          <button
+            id="scanFlags"
+            class="btn"
+            type="button"
+            title="Risky sessions in range"
+          >
+            Scan Flags
+          </button>
+        </div>
+      </section>
+
+      <section class="grid">
+        <!-- Sessions panel -->
+        <div class="card">
+          <div class="card-head">
+            <h2>Sessions</h2>
+            <div class="row">
+              <span class="muted">Total: <b id="totalSessions">0</b></span>
+              <span class="muted">Showing: <b id="visibleSessions">0</b></span>
+            </div>
+          </div>
+
+          <div class="row" style="justify-content: space-between">
+            <button id="prevPage" class="btn" type="button">Prev</button>
+            <div class="muted">Page <b id="pageNum">1</b></div>
+            <button id="nextPage" class="btn" type="button">Next</button>
+            <button id="sortByDate" class="btn" type="button">
+              Sort: Newest
+            </button>
+          </div>
+
+          <ul
+            id="sessions"
+            class="list"
+            style="margin-top: 8px; max-height: 60vh; overflow: auto"
+          ></ul>
+        </div>
+
+        <!-- Events / details -->
+        <div class="card">
+          <div class="card-head">
+            <h2>Session details</h2>
+            <div id="sel" class="muted">No session selected</div>
+          </div>
+
+          <div class="row">
+            <button id="refreshEvents" class="btn" type="button">
+              Refresh
+            </button>
+            <button id="exportCsv" class="btn" type="button">Export CSV</button>
+            <button id="copyTranscript" class="btn" type="button">
+              Copy transcript
+            </button>
+            <button id="genIndex" class="btn btn-primary" type="button">
+              Generate AI Index
+            </button>
+          </div>
+
+          <div class="row" style="margin-top: 10px">
+            <select id="roleFilter">
+              <option value="all">All roles</option>
+              <option value="user">User</option>
+              <option value="assistant">Assistant</option>
+            </select>
+            <input
+              id="eventSearch"
+              type="search"
+              placeholder="Search event text…"
+            />
+          </div>
+
+          <div class="list-item" style="margin-top: 10px">
+            <div class="row">
+              <div>Prompts: <b id="countUser">0</b></div>
+              <div>Replies: <b id="countAssistant">0</b></div>
+              <div>First: <b id="firstAt">–</b></div>
+              <div>Last: <b id="lastAt">–</b></div>
+              <div>Flags: <b id="flagLevel">none</b></div>
+            </div>
+          </div>
+
+          <ul
+            id="events"
+            class="list"
+            style="margin-top: 8px; max-height: 48vh; overflow: auto"
+          ></ul>
+
+          <h3 style="margin-top: 12px">Flag summary</h3>
+          <ul id="flagSummary" class="list"></ul>
+        </div>
+      </section>
+
+      <section class="card" id="flagScanSection" style="display: none">
+        <div class="card-head">
+          <h2>Risky sessions in range</h2>
+          <div class="muted">Heuristic: essay requests, humanisation, etc.</div>
+        </div>
+        <ul id="flagList" class="list"></ul>
+      </section>
+    </main>
+
+    <script type="module" src="/admin.js"></script>
+  </body>
+</html>
