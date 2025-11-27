@@ -1,49 +1,55 @@
 // server/openai.js
 import fetch from "node-fetch";
 
-const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
+const ENDPOINT = process.env.AZURE_OPENAI_ENDPOINT; // MUST end with /
+const KEY = process.env.AZURE_OPENAI_API_KEY;
+const DEPLOYMENT = process.env.AZURE_OPENAI_DEPLOYMENT || "gpt-5-mini";
+const API_VERSION =
+  process.env.AZURE_OPENAI_API_VERSION || "2025-04-01-preview";
 
-// hard limits for amber answers
 const MAX_WORDS = 200;
 
 const SYSTEM_PROMPT = `
 You are Worksy, a strict amber-mode academic assistant.
 Rules:
-- Bullet points only (no paragraphs).
+- Bullet points only.
 - Max ${MAX_WORDS} words total.
-- No fabricated citations, no URLs unless explicitly provided by user.
-- No ghost-writing or “humanising”; refuse if asked to produce final submission text.
+- No fabricated citations.
+- No URLs unless user provides them.
+- No ghost-writing.
 Formatting:
-- Output plain text bullets, one per line, no Markdown symbols, no "**".
-- If you need section labels, write them as "• Enzymes: ...", not with hashes or asterisks.
+- Plain text bullet points only.
 `.trim();
 
 export async function chatComplete(messages) {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error("Missing OPENAI_API_KEY");
+  if (!ENDPOINT) throw new Error("Missing AZURE_OPENAI_ENDPOINT");
+  if (!KEY) throw new Error("Missing AZURE_OPENAI_API_KEY");
+  if (!DEPLOYMENT) throw new Error("Missing AZURE_OPENAI_DEPLOYMENT");
 
-  // Prepend our system every time
+  const url = `${ENDPOINT}openai/deployments/${DEPLOYMENT}/chat/completions?api-version=${API_VERSION}`;
+
   const body = {
-    model: MODEL,
-    temperature: 0.3,
     messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
+    // temperature removed — Azure model only supports default
   };
 
-  const r = await fetch("https://api.openai.com/v1/chat/completions", {
+  const r = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
+      "api-key": KEY,
     },
     body: JSON.stringify(body),
   });
 
+  const data = await r.json();
+
   if (!r.ok) {
-    const t = await r.text();
-    throw new Error(`OpenAI error: ${r.status} ${t}`);
+    throw new Error(
+      `Azure OpenAI error ${r.status}: ${JSON.stringify(data, null, 2)}`,
+    );
   }
 
-  const data = await r.json();
   const text = data?.choices?.[0]?.message?.content || "";
   return { text, raw: data };
 }

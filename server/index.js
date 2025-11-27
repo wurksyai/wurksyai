@@ -36,8 +36,17 @@ const {
 const Env = z.object({
   NODE_ENV: z.string().default("development"),
   PORT: z.coerce.number().default(3000),
-  OPENAI_API_KEY: z.string().min(1, "OPENAI_API_KEY is required"),
-  OPENAI_MODEL: z.string().default("gpt-4o-mini"),
+
+  // Now optional because Azure might be used instead
+  OPENAI_API_KEY: z.string().optional(),
+  OPENAI_MODEL: z.string().default("gpt-5-mini"),
+
+  // Azure-specific vars (optional – openai.js handles defaults)
+  AZURE_OPENAI_ENDPOINT: z.string().optional(),
+  AZURE_OPENAI_API_KEY: z.string().optional(),
+  AZURE_OPENAI_DEPLOYMENT: z.string().optional(),
+  AZURE_OPENAI_API_VERSION: z.string().optional(),
+
   SUPABASE_URL: z.string().optional(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
   ADMIN_KEY: z.string().min(16).default("CHANGE_ME_ADMIN_KEY"),
