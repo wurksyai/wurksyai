@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Worksy AI — Lectures</title>
+    <title>Wurksy AI — Lectures</title>
     <link rel="icon" href="/logo.svg" />
     <meta name="color-scheme" content="dark light" />
     <!-- Early theme apply to avoid mismatch -->
     <script>
       (function () {
         try {
-          var t = localStorage.getItem("worksy-theme") || "dark";
+          var t = localStorage.getItem("wurksy-theme") || "dark";
           document.documentElement.dataset.theme = t;
           var m = document.querySelector('meta[name="color-scheme"]');
           if (m) m.content = t === "dark" ? "dark light" : "light dark";
@@ -152,6 +152,7 @@
         padding: 0.75rem;
         display: grid;
         gap: 0.6rem;
+        user-select: none;
       }
       .chat-input {
         border-top: 1px solid var(--border);
@@ -239,7 +240,7 @@
       <header class="topbar" role="banner">
         <div class="nav">
           <a class="brand" href="/index.html"
-            ><img src="/logo.svg" alt="Worksy AI"
+            ><img src="/logo.svg" alt="Wurksy AI"
           /></a>
           <nav class="links">
             <a href="/index.html">Chat</a>
@@ -364,7 +365,7 @@
           <label for="qaInput" class="sr-only">Your question</label>
           <textarea
             id="qaInput"
-            placeholder="Ask a question… (Enter to send, Shift+Enter for a new line)"
+            placeholder="Ask Wurksy AI..."
           ></textarea>
           <button
             id="qaSend"

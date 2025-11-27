@@ -283,7 +283,7 @@ export function registerAdminRoutes(
       res.setHeader("Content-Type", "application/zip");
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="worksy_export_${Date.now()}.zip"`,
+        `attachment; filename="wurksy_export_${Date.now()}.zip"`,
       );
 
       const archive = archiver("zip", { zlib: { level: 9 } });

@@ -1,5 +1,5 @@
 /* ===========================
-   Worksy AI – Global Styles
+   Wurksy AI – Global Styles
    =========================== */
 
 :root {
@@ -22,10 +22,10 @@
 }
 
 :root[data-theme="light"] {
-  --bg:#f7f9fc;
+  --bg:#f1f1f1;
   --card:#ffffff;
   --elev:#ffffff;
-  --border:#e5e7eb;
+  --border:#d1d1d1;
   --text:#0f172a;
   --muted:#64748b;
   --accent:#2563eb;
@@ -74,7 +74,7 @@ header.topbar {
 }
 
 header .brand { display:flex; gap:.6rem; align-items:center; }
-header .brand img { height: 24px; width: 24px; }
+header .brand img { height: 24px; width: 24px; border-radius: 3px;}
 header .brand span { font-weight: 600; letter-spacing: .2px; }
 
 /* ---------------------------
@@ -221,7 +221,6 @@ mark.__hit {
 .brand img { height: 26px; }
 .brand-text { display:flex; flex-direction:column; line-height:1.1; }
 .brand-name { font-weight:700; font-size: 17px; letter-spacing:.2px; color: var(--text); }
-.brand-slogan { font-size: 12px; color: var(--muted); }
 .links { display:flex; gap:10px; align-items:center; }
 .links a { color: var(--text); text-decoration:none; padding:8px 12px; border-radius: 10px; border:1px solid transparent; }
 .links a:hover { border-color: var(--border); background: color-mix(in hsl, var(--card) 80%, transparent); }

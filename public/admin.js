@@ -57,11 +57,11 @@ function setStatus(s) {
 }
 function saveKey() {
   ADMIN_KEY = keyInput.value.trim();
-  localStorage.setItem("worksy_admin_key", ADMIN_KEY);
+  localStorage.setItem("wurksy_admin_key", ADMIN_KEY);
   setStatus("Key saved");
 }
 function loadKey() {
-  const k = localStorage.getItem("worksy_admin_key") || "";
+  const k = localStorage.getItem("wurksy_admin_key") || "";
   keyInput.value = k;
   ADMIN_KEY = k;
 }
@@ -227,7 +227,7 @@ function exportCsv() {
     e.tokens ?? "",
   ]);
   const csv = [toCsvRow(head), ...rows.map(toCsvRow)].join("\n");
-  download(`worksy_${currentSession.id}_events.csv`, csv);
+  download(`wurksy_${currentSession.id}_events.csv`, csv);
 }
 async function copyTranscript() {
   if (!currentEvents.length) return;

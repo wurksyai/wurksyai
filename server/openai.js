@@ -10,7 +10,7 @@ const API_VERSION =
 const MAX_WORDS = 200;
 
 const SYSTEM_PROMPT = `
-You are Worksy, a strict amber-mode academic assistant.
+You are Wurksy, a strict amber-mode academic assistant.
 Rules:
 - Bullet points only.
 - Max ${MAX_WORDS} words total.

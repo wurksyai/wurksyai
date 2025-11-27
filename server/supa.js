@@ -13,6 +13,6 @@ export function getClient() {
       persistSession: false,
       detectSessionInUrl: false,
     },
-    global: { headers: { "X-Client-Info": "worksy-server/1.0" } },
+    global: { headers: { "X-Client-Info": "wurksy-server/1.0" } },
   });
 }

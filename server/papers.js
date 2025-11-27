@@ -5,8 +5,8 @@ import fetch from "node-fetch";
 import { searchCrossref, searchOpenAlex } from "./research.js";
 
 /** ===== Helpers ===== */
-const UA = "WorksyAI/1.0 (+https://example.edu) contact=worksy@example.edu";
-const UNPAYWALL_EMAIL = process.env.UNPAYWALL_EMAIL || "oa@worksy.ai";
+const UA = "WurksyAI/1.0 (+https://example.edu) contact=wurksy@example.edu";
+const UNPAYWALL_EMAIL = process.env.UNPAYWALL_EMAIL || "oa@wurksy.ai";
 const CORE_API_KEY = process.env.CORE_API_KEY || "";
 
 function fetchWithTimeout(url, opts = {}, ms = 8000) {
@@ -266,7 +266,7 @@ export function registerPaperRoutes(app, logger) {
       const system = {
         role: "system",
         content:
-          "You are Worksy, an amber-mode academic assistant. Answer in concise bullet points and ground ONLY in the provided paper text. If not in text, say you cannot confirm.",
+          "You are Wurksy, an amber-mode academic assistant. Answer in concise bullet points and ground ONLY in the provided paper text. If not in text, say you cannot confirm.",
       };
       const user = {
         role: "user",

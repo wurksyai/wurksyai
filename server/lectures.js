@@ -83,7 +83,7 @@ export function registerLectureRoutes(app, supabase, logger) {
     const system = {
       role: "system",
       content:
-        "You are Worksy (amber-mode). Answer in concise bullet points grounded ONLY in the lecture notes provided.",
+        "You are Wurksy (amber-mode). Answer in concise bullet points grounded ONLY in the lecture notes provided.",
     };
     const user = {
       role: "user",

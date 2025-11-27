@@ -46,7 +46,7 @@ const answerEl = $("#answer");
 let sessionId = null;
 async function getSession() {
   if (sessionId) return sessionId;
-  const cached = localStorage.getItem("worksy_session_id");
+  const cached = localStorage.getItem("wurksy_session_id");
   if (cached) {
     sessionId = cached;
     return sessionId;
@@ -59,7 +59,7 @@ async function getSession() {
   const j = await r.json();
   if (!r.ok || j.error) throw new Error(j.error || "Failed to start session");
   sessionId = j.sessionId;
-  localStorage.setItem("worksy_session_id", sessionId);
+  localStorage.setItem("wurksy_session_id", sessionId);
   return sessionId;
 }
 
@@ -390,8 +390,8 @@ import("/harvard_uol.js").then(({ formatHarvardUoL }) => {
   }
 });
 
-// ---------- Worksy Q&A ----------
-async function askWorksy(prompt, contextOverride) {
+// ---------- Wurksy Q&A ----------
+async function askWurksy(prompt, contextOverride) {
   if (!sessionId) await getSession();
 
   const contextText = String(
@@ -454,7 +454,7 @@ async function sendQuestion() {
   answerEl.appendChild(thinking);
 
   try {
-    const reply = await askWorksy(q);
+    const reply = await askWurksy(q);
     thinking.remove();
     addChat("assistant", reply);
 
@@ -485,7 +485,7 @@ summariseBtn?.addEventListener("click", async () => {
   const original = lastExtractedText || "";
   pdfTextEl.textContent = "Summarising…";
   try {
-    const reply = await askWorksy(
+    const reply = await askWurksy(
       "Summarise this article in 6–10 bullet points and list 3 key statistics with exact values. If figures are present, list which figure shows each stat.",
     );
     // Replace extract panel with bullets
@@ -513,7 +513,7 @@ function ensureHlPopup() {
   hlPopup.style.display = "none";
   askHlBtn = document.createElement("button");
   askHlBtn.className = "btn";
-  askHlBtn.textContent = "Ask Worksy";
+  askHlBtn.textContent = "Ask Wurksy";
   hlPopup.appendChild(askHlBtn);
   document.body.appendChild(hlPopup);
 }
@@ -547,7 +547,7 @@ askHlBtn?.addEventListener("click", async () => {
   if (!lastSel) return;
   hlPopup.style.display = "none";
   addChat("user", `Explain this: ${lastSel.slice(0, 120)}…`);
-  const reply = await askWorksy(
+  const reply = await askWurksy(
     "Explain this highlighted section in crisp bullet points.",
     lastSel,
   );

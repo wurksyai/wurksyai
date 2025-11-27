@@ -1,4 +1,4 @@
-// Worksy AI — Lectures page logic (upload + list + viewer + chat)
+// Wurksy AI — Lectures page logic (upload + list + viewer + chat)
 
 // ---------- Shorthands ----------
 const $ = (s) => document.querySelector(s);

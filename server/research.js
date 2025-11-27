@@ -2,7 +2,7 @@
 import fetch from "node-fetch";
 
 const TIMEOUT_MS = 10_000;
-const UA = "WorksyAI/1.0 (+https://worksy.example)";
+const UA = "WurksyAI/1.0 (+https://wurksy.example)";
 
 /* ---------------- Helpers ---------------- */
 async function getJSON(url, accept = "application/json") {
@@ -96,7 +96,7 @@ export async function searchCrossref(q, rows = 8) {
 
 /* ---------------- OpenAlex ---------------- */
 export async function searchOpenAlex(q, per_page = 8) {
-  const url = `https://api.openalex.org/works?search=${encodeURIComponent(q)}&per_page=${per_page}&mailto=opensource@worksy.ai`;
+  const url = `https://api.openalex.org/works?search=${encodeURIComponent(q)}&per_page=${per_page}&mailto=opensource@wurksy.ai`;
   const j = await getJSON(url);
 
   const items = (j.results || []).map((it) => {

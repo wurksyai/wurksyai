@@ -14,7 +14,7 @@ const submitBtn = document.querySelector("#submitBtn");
 const declBackdrop = document.querySelector("#declBackdrop");
 const declConfirm = document.querySelector("#declConfirm");
 const declCancel = document.querySelector("#declCancel");
-const d_onlyWorksy = document.querySelector("#d_onlyWorksy");
+const d_onlyWurksy = document.querySelector("#d_onlyWurksy");
 const d_noGhost = document.querySelector("#d_noGhost");
 const d_independent = document.querySelector("#d_independent");
 const d_understand = document.querySelector("#d_understand");
@@ -119,6 +119,12 @@ submitBtn?.addEventListener("click", () => {
   declBackdrop.classList.add("show");
 });
 
+const ta = document.getElementById("input");
+ta.addEventListener("input", () => {
+  ta.style.height = "auto";       // reset
+  ta.style.height = ta.scrollHeight + "px"; // grow to fit
+});
+
 declCancel?.addEventListener("click", () => {
   declBackdrop.classList.remove("show");
 });
@@ -127,7 +133,7 @@ let submitting = false;
 declConfirm?.addEventListener("click", async () => {
   if (submitting) return;
   if (
-    !d_onlyWorksy.checked ||
+    !d_onlyWurksy.checked ||
     !d_noGhost.checked ||
     !d_independent.checked ||
     !d_understand.checked
@@ -139,7 +145,7 @@ declConfirm?.addEventListener("click", async () => {
   if (!assignmentId) return alert("Please enter your Assignment ID.");
 
   const declaration = {
-    onlyWorksy: true,
+    onlyWurksy: true,
     noGhost: true,
     independent: true,
     understand: true,

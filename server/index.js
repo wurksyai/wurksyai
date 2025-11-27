@@ -493,7 +493,7 @@ app.post("/api/chat", chatLimiter, async (req, res, next) => {
     const sys = {
       role: "system",
       content:
-        "You are Worksy. Answer ONLY in bullet points, under 200 words total. No fabricated citations. No ghost-writing. No markdown symbols.",
+        "You are Wurksy. Answer ONLY in bullet points, under 200 words total. No fabricated citations. No ghost-writing. No markdown symbols.",
     };
     const { text } = await chatComplete([
       sys,
@@ -671,5 +671,5 @@ app.use((err, req, res, _next) => {
 
 // Boot
 app.listen(env.PORT, () =>
-  logger.info(`Worksy listening on http://localhost:${env.PORT}`),
+  logger.info(`Wurksy listening on http://localhost:${env.PORT}`),
 );

@@ -29,7 +29,7 @@ export async function buildAiIndex({ session, events }) {
   doc.on("data", (c) => chunks.push(c));
 
   // Header
-  doc.font("Helvetica-Bold").fontSize(18).text("Worksy AI Index", { align: "center" });
+  doc.font("Helvetica-Bold").fontSize(18).text("Wurksy AI Index", { align: "center" });
   doc.moveDown(0.5);
   doc.font("Helvetica").fontSize(10);
   para(doc, `Session: ${session?.id || session?.session_id || "unknown"}`);
@@ -43,7 +43,7 @@ export async function buildAiIndex({ session, events }) {
     bullets(
       doc,
       [
-        d.worksy_only ? "I used only Worksy (except basic tools like Grammarly/Canva)" : "",
+        d.wurksy_only ? "I used only Wurksy (except basic tools like Grammarly/Canva)" : "",
         d.no_ghost ? "I did not copy, paraphrase or ‘humanise’ AI text" : "",
         d.own_work ? "The final submission is my own work" : "",
         d.understood ? "I understand non-compliance may be academic malpractice" : "",

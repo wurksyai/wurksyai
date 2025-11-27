@@ -3,13 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Worksy AI</title>
+    <title>Wurksy AI</title>
     <link rel="stylesheet" href="/styles.css" />
     <script defer src="/theme.js"></script>
     <style>
       /* make bullets show one per line */
       #msgs li {
         white-space: pre-wrap;
+        user-select: none;
       }
 
       /* clean, minimal modal */
@@ -61,6 +62,57 @@
           grid-template-columns: 1fr;
         }
       }
+
+      /* ChatGPT-like message bar */
+      #send {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        padding: 10px 14px;
+        border-radius: 28px;
+        margin-top: 10px;
+        color: var(--text)
+      }
+
+      /* Make input fill the space */
+      #send textarea {
+        flex: 1;
+        padding: 10px 4px;
+        line-height: 1.5;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: 16px;
+        resize: none; /* important */
+        overflow: hidden; /* prevents scrollbar flash */
+      }
+
+      /* Replace default button style */
+      #send button[type="submit"] {
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 18px;
+        border: none;
+        cursor: pointer;
+      }
+
+      /* Hover effect */
+      #send button[type="submit"]:hover {
+        opacity: 0.9;
+      }
+
+      /* Remove extra buttons from styling (optional) */
+      #makeIndex,
+      #submitBtn {
+        border-radius: 6px;
+      }
+
     </style>
   </head>
   <body>
@@ -70,12 +122,11 @@
         <a class="brand" href="/index.html">
           <img
             src="/logo.svg"
-            alt="Worksy AI logo"
+            alt="Wurksy AI logo"
             onerror="this.style.display='none'"
           />
           <span class="brand-text">
-            <span class="brand-name">Worksy AI</span>
-            <span class="brand-slogan">Work easy with Worksy</span>
+            <span class="brand-name">Wurksy AI</span>
           </span>
         </a>
         <div class="links">
@@ -105,9 +156,9 @@
               Amber-mode academic assistant • logs • caps • integrity
             </p>
             <h1 class="title-xl">
-              Worksy <span class="gradient-text">AI</span>
+              Wurksy <span class="gradient-text">AI</span>
             </h1>
-            <p class="slogan-under">Work easy with Worksy</p>
+            <p class="slogan-under">Work easy with Wurksy</p>
             <p class="subtitle">
               A policy-aligned AI workspace for students. Upload lectures, read
               papers in-app, ask focused questions, and export an AI Index for
@@ -145,13 +196,13 @@
         <ul id="msgs" aria-live="polite"></ul>
 
         <form id="send" class="row" autocomplete="off">
-          <input
+          <textarea
             id="input"
-            placeholder="Ask something…"
-            autocomplete="off"
+            placeholder="Ask Wurksy AI..."
             aria-label="Message"
-          />
-          <button type="submit" class="btn btn-primary">Send</button>
+            rows="1"
+          ></textarea>
+          <button type="submit" class="btn btn-primary">↑</button>
           <button
             id="makeIndex"
             type="button"
@@ -193,7 +244,7 @@
 
         <div class="grid" style="margin: 8px 0 4px">
           <label
-            ><input type="checkbox" id="d_onlyWorksy" /> Worksy was the only AI
+            ><input type="checkbox" id="d_onlyWurksy" /> Wurksy was the only AI
             tool I used (except Grammarly/Canva).</label
           >
           <label

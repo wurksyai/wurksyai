@@ -1,7 +1,7 @@
-// Worksy AI — Theme + Navigation Cache
+// Wurksy AI — Theme + Navigation Cache
 
 const root = document.documentElement;
-const key = "worksy-theme";
+const key = "wurksy-theme";
 
 // ----- Theme -----
 function setTheme(mode) {
