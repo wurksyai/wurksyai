@@ -72,7 +72,7 @@
       .hero-title {
         display: flex;
         align-items: center;
-        gap: 0px;
+        gap: 12px;
       }
       .hero-logo {
         height: 48px;
@@ -83,7 +83,7 @@
       .cta {
         display: flex;
         gap: 12px;
-        margin-top: 12px;
+        margin-top: 0px;
       }
 
       /* Recommended reading styles */
@@ -108,6 +108,10 @@
       }
       .recommended-list .list-item a {
         font-size: 13px;
+      }
+
+      #cap {
+        text-align: right;
       }
     </style>
   </head>
@@ -188,41 +192,7 @@
 
         <!-- CHAT CARD -->
         <section id="chat" class="card chat-wrap">
-          <!-- Top row: title, privacy/terms, notes chip, cap on right -->
-          <div class="chat-head">
-            <h2>Chat (Amber Mode)</h2>
-
-            <div class="chat-head-middle">
-              <a class="link" href="/privacy.html" target="_blank">Privacy</a> •
-              <a class="link" href="/terms.html" target="_blank"
-                >Terms &amp; conditions</a
-              >
-            </div>
-
-            <button
-              type="button"
-              class="notes-chip"
-              onclick="document.getElementById('sessionNotes')?.focus()"
-            >
-              Optional notes (e.g. other AI tools used)
-            </button>
-
-            <div id="cap" class="cap muted"></div>
-          </div>
-
-          <!-- Notes textarea directly under header -->
-          <div class="notes-row">
-            <textarea
-              id="sessionNotes"
-              placeholder="Add any notes you want recorded in your AI Index..."
-              rows="2"
-            ></textarea>
-            <p class="muted notes-hint">
-              These notes are saved when you press
-              <strong>Submit &amp; Lock</strong> and will appear in your AI
-              Index.
-            </p>
-          </div>
+          <div id="cap" class="cap muted"></div>
 
           <ul id="msgs" aria-live="polite"></ul>
 
@@ -238,11 +208,30 @@
               Submit &amp; Lock
             </button>
           </form>
+          
+          <!-- Notes textarea directly under header -->
+          <div class="notes-row">
+            <textarea
+              id="sessionNotes"
+              placeholder="Add any notes you want recorded in your AI Index..."
+              rows="2"
+            ></textarea>
+          </div>
 
-          <p class="muted" style="margin-top: 10px">
-            Replies are concise and logged. Once you press
-            <strong>Submit &amp; Lock</strong>, the session closes.
-          </p>
+          <div class="chat-head">
+            <p class="muted" style="margin-top: 10px">
+              Replies are concise and logged. Once you press
+              <strong>Submit &amp; Lock</strong>, the session closes.
+            </p>
+            
+            <div class="chat-head-middle">
+              <a class="link" href="/privacy.html" target="_blank">Privacy</a> •
+              <a class="link" href="/terms.html" target="_blank"
+                >Terms &amp; conditions</a
+              >
+            </div>
+          </div>
+
         </section>
       </section>
     </main>
