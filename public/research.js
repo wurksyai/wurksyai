@@ -36,6 +36,9 @@ const citeBtn = $("#citeBtn");
 const addBibBtn = $("#addBibBtn");
 const bibEl = $("#bib");
 const copyBibBtn = $("#copyBibBtn");
+const citationRow = $("#citationRow");
+const citationTextEl = $("#citationText");
+const copyCitationBtn = $("#copyCitationBtn");
 
 // Q&A
 const questionEl = $("#question");
@@ -135,6 +138,13 @@ function escapeHTML(s) {
 let current = null;
 let bibliography = [];
 let lastExtractedText = ""; // keep the raw text so user can ask questions
+let lastCitationLine = "";
+
+function clearCitation() {
+  lastCitationLine = "";
+  if (citationTextEl) citationTextEl.textContent = "";
+  if (citationRow) citationRow.style.display = "none";
+}
 
 function resultRow(it) {
   const li = document.createElement("li");
@@ -200,6 +210,7 @@ async function selectItem(it) {
   abstractEl.textContent = it.abstract || "(no abstract available)";
   lastExtractedText = "";
   pdfTextEl.textContent = "";
+  clearCitation();
 
   // log + save research artifact for AI Index
   await recordPaperClick(it);
@@ -397,18 +408,39 @@ import("/harvard_uol.js").then(({ formatHarvardUoL }) => {
     return formatHarvardUoL(mapped, { accessDate: ACCESS_DYNAMIC });
   }
 
-  citeBtn.addEventListener("click", async () => {
-    if (!current) return;
+  function showCitation(line) {
+    if (!line) return;
+    lastCitationLine = line;
+    if (citationTextEl) citationTextEl.textContent = line;
+    if (citationRow) citationRow.style.display = "flex";
+  }
+
+  function computeCitation() {
+    if (!current) return null;
     const line = formatRef(current, styleEl.value);
-    await navigator.clipboard.writeText(line);
-    setStatus("Citation copied");
+    showCitation(line);
+    return line;
+  }
+
+  citeBtn.addEventListener("click", () => {
+    const line = computeCitation();
+    if (!line) return;
+    setStatus("Citation ready");
   });
 
-  addBibBtn.addEventListener("click", async () => {
-    if (!current) return;
-    const line = formatRef(current, styleEl.value);
+  addBibBtn.addEventListener("click", () => {
+    const line = computeCitation();
+    if (!line) return;
     bibliography.push(line);
     renderBib();
+    setStatus("Added to bibliography");
+    });
+
+    copyCitationBtn?.addEventListener("click", async () => {
+      const line = computeCitation();
+      if (!line) return;
+      await navigator.clipboard.writeText(line);
+      setStatus("Citation copied");
   });
 
   copyBibBtn.addEventListener("click", async () => {

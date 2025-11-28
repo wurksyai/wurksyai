@@ -155,11 +155,33 @@
             <button id="addBibBtn" class="btn" type="button">
               Add to bibliography
             </button>
-            <button id="copyBibBtn" class="btn" type="button">
-              Copy bibliography
+          </div>
+
+          <div
+            id="citationRow"
+            class="row"
+            style="
+              margin-top: 8px;
+              gap: 8px;
+              align-items: flex-start;
+              display: none;
+            "
+          >
+            <div
+              id="citationText"
+              class="list-item"
+              style="flex: 1; margin: 0"
+            ></div>
+            <button id="copyCitationBtn" class="btn" type="button">
+              Copy citation
             </button>
           </div>
+
+          <h3 style="margin-top: 16px">Bibliography</h3>
           <ul id="bib" class="list" style="margin-top: 8px"></ul>
+          <button id="copyBibBtn" class="btn" type="button">
+            Copy bibliography
+          </button>
 
           <h3 style="margin-top: 16px">Ask about this paper</h3>
           <div
