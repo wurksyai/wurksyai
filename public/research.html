@@ -39,6 +39,21 @@
       #viewer {
         position: relative;
       }
+
+      /* Research layout tweaks */
+      #researchGrid {
+        grid-template-columns: 0.3fr 0.7fr;
+      }
+
+      @media (max-width: 1100px) {
+        #researchGrid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      #viewerCard {
+        display: none;
+      }
     </style>
     <script src="/theme.js" defer></script>
   </head>
@@ -81,7 +96,7 @@
         </form>
       </section>
 
-      <section class="grid">
+      <section id="researchGrid" class="grid">
         <!-- Results list -->
         <div class="card">
           <h2>Results</h2>
@@ -89,7 +104,7 @@
         </div>
 
         <!-- Preview / Viewer -->
-        <div class="card">
+        <div id="viewerCard" class="card">
           <h2 id="paperTitle" class="title">Select a result</h2>
           <div id="meta" class="muted" style="margin: 6px 0 8px"></div>
           <p id="abstract" class="muted"></p>

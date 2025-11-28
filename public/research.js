@@ -16,6 +16,7 @@ const metaEl = $("#meta");
 const abstractEl = $("#abstract");
 
 // Viewer
+const viewerCard = $("#viewerCard");
 const pdfCanvas = $("#pdfCanvas");
 const pageInfo = $("#pageInfo");
 const prevPageBtn = $("#prevPage");
@@ -210,6 +211,9 @@ async function selectItem(it) {
   abstractEl.textContent = it.abstract || "(no abstract available)";
   lastExtractedText = "";
   pdfTextEl.textContent = "";
+  if (viewerCard) {
+    viewerCard.style.display = "block";
+  }
   clearCitation();
 
   // log + save research artifact for AI Index
