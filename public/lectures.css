@@ -1,0 +1,179 @@
+/* ============================================================
+   Wurksy AI — Lectures Page Styling
+   Supports: PDF viewer, PPTX slide viewer, text viewer, Q&A.
+   ============================================================ */
+
+:root {
+  --viewer-bg: color-mix(in hsl, var(--card) 92%, transparent);
+  --viewer-border: var(--border);
+  --slide-bg: #000;
+  --slide-border: #1b253b;
+}
+
+/* Layout grid is handled in lectures.html */
+
+.viewer-body {
+  background: var(--viewer-bg);
+}
+
+/* ============================
+   SLIDE VIEWER
+   ============================ */
+
+#slideViewer {
+  display: none;               /* hidden until toggle = slides */
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  padding: 1rem;
+  background: var(--viewer-bg);
+}
+
+.slide-frame {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.slide-frame img {
+  max-width: 100%;
+  max-height: 650px;
+  border: 1px solid var(--slide-border);
+  border-radius: 12px;
+  background: var(--slide-bg);
+  box-shadow: 0 0 18px rgba(0,0,0,.3);
+}
+
+/* ============================
+   TEXT VIEWER
+   ============================ */
+
+#textViewer {
+  display: block;
+  padding: 1rem 1.25rem 2rem;
+  line-height: 1.65;
+  overflow: auto;
+}
+
+/* Highlight */
+mark.__hit {
+  background: color-mix(in hsl, var(--accent) 22%, transparent);
+  border-radius: 6px;
+  padding: 0.05rem 0.2rem;
+}
+
+/* ============================
+   VIEW MODE TOGGLE BUTTONS
+   ============================ */
+
+#viewModeToggle {
+  margin-left: 0.5rem;
+  display: inline-flex;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  background: var(--surface-1);
+}
+
+#viewModeToggle button {
+  padding: 6px 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 13px;
+}
+
+#viewModeToggle button:hover {
+  background: var(--surface-2);
+}
+
+#viewModeToggle button.active {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: #0b1020;
+  font-weight: 600;
+}
+
+/* ============================
+   OUTLINE PANEL
+   ============================ */
+
+.outline {
+  background: var(--viewer-bg);
+  border-right: 1px solid var(--border);
+  padding: 0.75rem;
+  overflow: auto;
+}
+
+.outline h4 {
+  margin-top: 0;
+  opacity: 0.8;
+  font-size: 0.95rem;
+}
+
+.outline .ol {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.outline .ol button {
+  border-radius: 8px;
+  padding: 0.35rem 0.5rem;
+  background: transparent;
+  text-align: left;
+}
+
+.outline .ol button:hover {
+  background: var(--surface-2);
+}
+
+/* ============================
+   CHAT PANEL
+   ============================ */
+
+.chat-body {
+  overflow: auto;
+  padding: 0.75rem;
+  display: grid;
+  gap: 0.6rem;
+  user-select: none;
+}
+
+.msg {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+.msg.user {
+  background: rgba(34,211,238,.08);
+}
+
+.msg.assistant {
+  background: rgba(96,165,250,.08);
+}
+
+.msg.error {
+  background: #2a1111;
+  border-color: #5a2222;
+  color: #ffb3b3;
+}
+
+/* ============================
+   RESPONSIVE MODE
+   ============================ */
+
+@media (max-width: 900px) {
+  /* Middle panel stacks on top of chat */
+  .viewer-body {
+    grid-template-columns: 1fr !important;
+  }
+
+  .outline {
+    display: none;
+  }
+
+  #slideViewer img {
+    max-height: 420px;
+  }
+}

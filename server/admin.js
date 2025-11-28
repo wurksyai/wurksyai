@@ -82,7 +82,7 @@ export function registerAdminRoutes(
   ADMIN_KEY,
   buildAiIndex,
   normaliseEvents,
-  uploadAndSign,
+  uploadAndSign, // currently unused here but kept for future
 ) {
   function requireAdmin(req, res, next) {
     const key = req.query.admin_key || req.headers["x-admin-key"] || "";
@@ -93,14 +93,28 @@ export function registerAdminRoutes(
 
   /**
    * GET /api/admin/sessions
-   * Query: admin_key, from=YYYY-MM-DD, to=YYYY-MM-DD, page=1, pageSize=50, q=
+   * Query:
+   *   admin_key,
+   *   from=YYYY-MM-DD,
+   *   to=YYYY-MM-DD,
+   *   page=1,
+   *   pageSize=50,
+   *   q=,
+   *   assignmentId=<uuid> (optional)
    */
   app.get("/api/admin/sessions", requireAdmin, async (req, res) => {
     try {
       if (!supabase)
         return res.json({ sessions: [], page: 1, pageSize: 50, total: 0 });
 
-      const { from, to, page = "1", pageSize = "50", q = "" } = req.query || {};
+      const {
+        from,
+        to,
+        page = "1",
+        pageSize = "50",
+        q = "",
+        assignmentId,
+      } = req.query || {};
       const { fromISO, toISO } = parseDateBounds(from, to);
       const pg = Math.max(1, parseInt(page, 10) || 1);
       const size = Math.min(200, Math.max(1, parseInt(pageSize, 10) || 50));
@@ -112,9 +126,7 @@ export function registerAdminRoutes(
 
       if (fromISO) query = query.gte("created_at", fromISO);
       if (toISO) query = query.lte("created_at", toISO);
-      if (q) {
-        // filter client-side after fetch page (simple approach)
-      }
+      if (assignmentId) query = query.eq("assignment_id", assignmentId);
 
       const fromIdx = (pg - 1) * size;
       const toIdx = fromIdx + size - 1;
@@ -126,17 +138,31 @@ export function registerAdminRoutes(
       let sessions = data || [];
       if (q) {
         const needle = String(q).toLowerCase();
-        sessions = sessions.filter((r) =>
-          String(r.id || r.session_id || "")
-            .toLowerCase()
-            .includes(needle),
-        );
+        sessions = sessions.filter((r) => {
+          const idStr = String(r.id || r.session_id || "").toLowerCase();
+          const studentStr = String(r.student_id || "").toLowerCase();
+          const moduleStr = String(r.student_module || "").toLowerCase();
+          const assignmentCodeStr = String(
+            r.assignment_code || "",
+          ).toLowerCase();
+          return (
+            idStr.includes(needle) ||
+            studentStr.includes(needle) ||
+            moduleStr.includes(needle) ||
+            assignmentCodeStr.includes(needle)
+          );
+        });
       }
 
       const mapped = sessions.map((row) => ({
         id: row.id || row.session_id,
         created_at: row.created_at,
         mode: row.mode ?? "guest",
+        locked_at: row.locked_at ?? null,
+        student_id: row.student_id ?? null,
+        student_module: row.student_module ?? null,
+        assignment_id: row.assignment_id ?? null,
+        assignment_code: row.assignment_code ?? null,
       }));
 
       res.json({
@@ -194,13 +220,20 @@ export function registerAdminRoutes(
    * GET /api/admin/flags
    * Either:
    *   - sessionId => returns summary + per-event matches
-   *   - from/to => returns ranked sessions with risk
+   *   - from/to (and optional assignmentId) => returns ranked sessions with risk
+   *
+   * Query:
+   *   admin_key,
+   *   sessionId?,
+   *   from=YYYY-MM-DD?,
+   *   to=YYYY-MM-DD?,
+   *   assignmentId=<uuid>?
    */
   app.get("/api/admin/flags", requireAdmin, async (req, res) => {
     try {
       if (!supabase) return res.json({ items: [] });
 
-      const { sessionId, from, to } = req.query || {};
+      const { sessionId, from, to, assignmentId } = req.query || {};
 
       if (sessionId) {
         const { data, error } = await supabase
@@ -222,11 +255,14 @@ export function registerAdminRoutes(
       // Rough scan: pull recent sessions in range and compute score
       let q = supabase
         .from("sessions")
-        .select("id,created_at")
+        .select("id,session_id,created_at,assignment_id,assignment_code")
         .order("created_at", { ascending: false })
         .limit(1000);
+
       if (fromISO) q = q.gte("created_at", fromISO);
       if (toISO) q = q.lte("created_at", toISO);
+      if (assignmentId) q = q.eq("assignment_id", assignmentId);
+
       const { data: sessions, error: sErr } = await q;
       if (sErr) throw sErr;
 
@@ -246,6 +282,8 @@ export function registerAdminRoutes(
             level: summary.level,
             score: summary.totalScore,
             counts: summary.counts,
+            assignment_id: s.assignment_id ?? null,
+            assignment_code: s.assignment_code ?? null,
           });
         }
       }
@@ -294,10 +332,30 @@ export function registerAdminRoutes(
       });
       archive.pipe(res);
 
-      // sessions.csv
-      const sRows = [["session_id", "created_at", "mode"]];
+      // sessions.csv (extended with student + assignment info)
+      const sRows = [
+        [
+          "session_id",
+          "created_at",
+          "mode",
+          "locked_at",
+          "student_id",
+          "student_module",
+          "assignment_id",
+          "assignment_code",
+        ],
+      ];
       (sessions || []).forEach((s) =>
-        sRows.push([s.id || s.session_id, s.created_at, s.mode || "guest"]),
+        sRows.push([
+          s.id || s.session_id,
+          s.created_at,
+          s.mode || "guest",
+          s.locked_at || "",
+          s.student_id || "",
+          s.student_module || "",
+          s.assignment_id || "",
+          s.assignment_code || "",
+        ]),
       );
       archive.append(
         sRows

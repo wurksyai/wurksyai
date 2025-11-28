@@ -1,87 +1,75 @@
-// Pro Admin Console
-const $ = (s) => document.querySelector(s);
+// public/admin.js — simplified admin console
 
-// top
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+
 const statusEl = $("#status");
 const keyInput = $("#adminKey");
 const saveKeyBtn = $("#saveKey");
-const loadBtn = $("#loadSessions");
-const fromDateEl = $("#fromDate");
-const toDateEl = $("#toDate");
-const queryEl = $("#query");
-const pageSizeEl = $("#pageSize");
-const autoRefresh = $("#autoRefresh");
-const bulkExportBtn = $("#bulkExport");
-const scanFlagsBtn = $("#scanFlags");
 
-// sessions panel
-const sessionsEl = $("#sessions");
-const totalSessionsEl = $("#totalSessions");
-const visibleSessionsEl = $("#visibleSessions");
-const sortByDateBtn = $("#sortByDate");
-const prevPageBtn = $("#prevPage");
-const nextPageBtn = $("#nextPage");
-const pageNumEl = $("#pageNum");
+// tabs
+const tabButtons = $$("[data-tab-btn]");
+const tabPanels = $$("[data-tab]");
 
-// right panel
-const selEl = $("#sel");
-const refreshEventsBtn = $("#refreshEvents");
-const roleFilter = $("#roleFilter");
-const eventSearch = $("#eventSearch");
-const eventsEl = $("#events");
-const exportCsvBtn = $("#exportCsv");
-const copyTranscriptBtn = $("#copyTranscript");
-const genIndexBtn = $("#genIndex");
-const countUserEl = $("#countUser");
-const countAssistantEl = $("#countAssistant");
-const firstAtEl = $("#firstAt");
-const lastAtEl = $("#lastAt");
-const flagLevelEl = $("#flagLevel");
-const flagSummaryEl = $("#flagSummary");
+// create assignment wizard
+const assModuleCodeEl = $("#assModuleCode");
+const assTitleEl = $("#assTitle");
+const assDeadlineEl = $("#assDeadline");
+const assPromptCapEl = $("#assPromptCap");
+const assBriefEl = $("#assBrief");
+const assRecommendedEl = $("#assRecommended");
+const stepBackBtn = $("#stepBack");
+const stepNextBtn = $("#stepNext");
+const stepNumEl = $("#stepNum");
+const stepLabelEl = $("#stepLabel");
+const createdAssignmentInfoEl = $("#createdAssignmentInfo");
+const createdAssignmentLinkEl = $("#createdAssignmentLink");
+const copyCreatedAssignmentLinkBtn = $("#copyCreatedAssignmentLink");
 
-// risk scan section
-const flagScanSection = $("#flagScanSection");
-const flagListEl = $("#flagList");
+// AI Index tab
+const sessionFilterEl = $("#sessionFilter");
+const refreshSessionsBtn = $("#refreshSessions");
+const indexSessionRowsEl = $("#indexSessionRows");
 
 let ADMIN_KEY = "";
+let currentStep = 1;
+const MAX_STEP = 3;
 let sessions = [];
-let currentSession = null;
-let currentEvents = [];
-let sortNewest = true;
-let refreshTimer = null;
-let curPage = 1;
-let total = 0;
 
-function setStatus(s) {
-  statusEl.textContent = s;
+// ---------- helpers ----------
+function setStatus(msg) {
+  if (statusEl) statusEl.textContent = msg;
 }
+
 function saveKey() {
-  ADMIN_KEY = keyInput.value.trim();
+  ADMIN_KEY = (keyInput.value || "").trim();
   localStorage.setItem("wurksy_admin_key", ADMIN_KEY);
-  setStatus("Key saved");
+  setStatus("Admin key saved");
 }
+
 function loadKey() {
   const k = localStorage.getItem("wurksy_admin_key") || "";
   keyInput.value = k;
   ADMIN_KEY = k;
 }
 
-async function fetchJSON(url) {
-  const r = await fetch(url);
-  const t = await r.text();
+async function fetchJSON(url, options = {}) {
+  const r = await fetch(url, options);
+  const text = await r.text();
   if (!r.ok) {
-    let m = t;
+    let msg = text;
     try {
-      m = JSON.parse(t).error || m;
+      msg = JSON.parse(text).error || msg;
     } catch {}
-    throw new Error(m || "Request failed");
+    throw new Error(msg || "Request failed");
   }
   try {
-    return JSON.parse(t);
+    return JSON.parse(text);
   } catch {
     return {};
   }
 }
+
 function qs(params) {
   return Object.entries(params)
     .filter(([, v]) => v !== undefined && v !== null && v !== "")
@@ -89,296 +77,286 @@ function qs(params) {
     .join("&");
 }
 
-async function loadSessions(page = 1) {
+// ---------- tabs ----------
+function showTab(name) {
+  tabButtons.forEach((btn) => {
+    const active = btn.dataset.tabBtn === name;
+    btn.classList.toggle("btn-primary", active);
+    btn.classList.toggle("active", active);
+  });
+  tabPanels.forEach((p) => {
+    p.style.display = p.dataset.tab === name ? "block" : "none";
+  });
+}
+
+tabButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const name = btn.dataset.tabBtn;
+    if (!name) return;
+    showTab(name);
+  });
+});
+
+// ---------- wizard ----------
+function updateStepUI() {
+  stepNumEl.textContent = String(currentStep);
+  const labels = {
+    1: "Basics",
+    2: "Deadline & prompt cap",
+    3: "Brief & resources",
+  };
+  stepLabelEl.textContent = labels[currentStep] || "";
+
+  $$(".assignment-step").forEach((div) => {
+    const s = Number(div.dataset.step || "0");
+    div.style.display = s === currentStep ? "grid" : "none";
+  });
+
+  stepBackBtn.disabled = currentStep === 1;
+  stepNextBtn.textContent =
+    currentStep === MAX_STEP ? "Create assignment" : "Next";
+}
+
+function clampPromptCap(raw) {
+  let n = parseInt(raw, 10);
+  if (!Number.isFinite(n) || n <= 0) n = 100;
+  if (n > 100) n = 100;
+  if (n < 1) n = 1;
+  return n;
+}
+
+function parseRecommended() {
+  const text = assRecommendedEl.value || "";
+  return text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((line) => {
+      // if it looks like a URL use as url+label
+      const isUrl = /^https?:\/\//i.test(line);
+      return isUrl ? { url: line, label: line } : { url: "", label: line };
+    });
+}
+
+async function createAssignment() {
   if (!ADMIN_KEY) {
     setStatus("Enter ADMIN_KEY first");
     return;
   }
-  curPage = page;
+
+  const moduleCode = assModuleCodeEl.value.trim();
+  const title = assTitleEl.value.trim();
+  const deadline = assDeadlineEl.value;
+  const promptCap = clampPromptCap(assPromptCapEl.value);
+  const brief = assBriefEl.value.trim();
+  const recommendedPdfs = parseRecommended();
+
+  if (!moduleCode || !title) {
+    setStatus("Module code and title are required");
+    return;
+  }
+
+  setStatus("Creating assignment…");
+  try {
+    const params = { admin_key: ADMIN_KEY };
+    const body = {
+      moduleCode,
+      title,
+      brief,
+      deadline: deadline || null,
+      promptCap,
+      recommendedPdfs,
+      createdBy: null,
+    };
+    const j = await fetchJSON(`/api/admin/assignments?${qs(params)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    const url =
+      j.studentUrl ||
+      (j.assignment &&
+        `${location.origin}/login.html?a=${encodeURIComponent(
+          j.assignment.short_code,
+        )}`);
+
+    if (url) {
+      createdAssignmentLinkEl.textContent = url;
+      createdAssignmentInfoEl.style.display = "block";
+      try {
+        await navigator.clipboard.writeText(url);
+        setStatus("Assignment created. Link copied to clipboard.");
+      } catch {
+        setStatus("Assignment created. Click 'Copy link' to copy.");
+      }
+    } else {
+      setStatus("Assignment created, but link missing.");
+    }
+
+    // reset wizard back to step 1 (but keep values in case they want to tweak)
+    currentStep = 1;
+    updateStepUI();
+  } catch (e) {
+    setStatus(e.message || "Failed to create assignment");
+  }
+}
+
+// navigation buttons
+stepBackBtn.addEventListener("click", () => {
+  if (currentStep > 1) {
+    currentStep -= 1;
+    updateStepUI();
+  }
+});
+
+stepNextBtn.addEventListener("click", async () => {
+  // simple validation per step
+  if (currentStep === 1) {
+    if (!assModuleCodeEl.value.trim() || !assTitleEl.value.trim()) {
+      setStatus("Please fill in module code and title.");
+      return;
+    }
+  }
+  if (currentStep === 2) {
+    assPromptCapEl.value = clampPromptCap(assPromptCapEl.value);
+  }
+
+  if (currentStep < MAX_STEP) {
+    currentStep += 1;
+    updateStepUI();
+  } else {
+    // final step -> create
+    await createAssignment();
+  }
+});
+
+copyCreatedAssignmentLinkBtn.addEventListener("click", async () => {
+  const txt = createdAssignmentLinkEl.textContent || "";
+  if (!txt) return;
+  try {
+    await navigator.clipboard.writeText(txt);
+    setStatus("Link copied");
+  } catch {
+    setStatus("Unable to copy link");
+  }
+});
+
+// ---------- AI Index tab ----------
+async function loadSessions() {
+  if (!ADMIN_KEY) {
+    setStatus("Enter ADMIN_KEY first");
+    return;
+  }
   setStatus("Loading sessions…");
   try {
-    const params = {
-      admin_key: ADMIN_KEY,
-      from: fromDateEl.value || undefined,
-      to: toDateEl.value || undefined,
-      page: curPage,
-      pageSize: pageSizeEl.value || 50,
-      q: queryEl.value || undefined,
-    };
+    const params = { admin_key: ADMIN_KEY };
     const j = await fetchJSON(`/api/admin/sessions?${qs(params)}`);
-    sessions = j.sessions || [];
-    total = j.total || sessions.length;
+    sessions = j.sessions || j || [];
     renderSessions();
-    pageNumEl.textContent = String(curPage);
-    totalSessionsEl.textContent = String(total);
     setStatus(`Loaded ${sessions.length} sessions`);
   } catch (e) {
-    setStatus(e.message);
+    setStatus(e.message || "Failed to load sessions");
   }
 }
+
 function renderSessions() {
-  let list = sessions.slice();
-  if (!sortNewest)
-    list.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-  sessionsEl.innerHTML = "";
-  list.forEach((s) => {
-    const li = document.createElement("li");
-    li.className = "list-item";
-    li.style.cursor = "pointer";
-    li.innerHTML = `
-      <div class="title">${s.id}</div>
-      <div class="muted">${new Date(s.created_at).toLocaleString()} • ${s.mode || "guest"}</div>
-    `;
-    li.addEventListener("click", () => selectSession(s));
-    sessionsEl.appendChild(li);
-  });
-  visibleSessionsEl.textContent = String(list.length);
-}
+  const needle = (sessionFilterEl.value || "").toLowerCase();
+  indexSessionRowsEl.innerHTML = "";
 
-async function loadEvents() {
-  if (!ADMIN_KEY || !currentSession) return;
-  setStatus("Loading events…");
-  try {
-    const p = {
-      admin_key: ADMIN_KEY,
-      sessionId: currentSession.id,
-      page: 1,
-      pageSize: 500,
-    };
-    const j = await fetchJSON(`/api/admin/events?${qs(p)}`);
-    currentEvents = j.events || [];
-    applyEventFilters();
-    await loadFlagsForSession(currentSession.id);
-    setStatus(`Loaded ${currentEvents.length} events`);
-  } catch (e) {
-    setStatus(e.message);
+  const filtered = sessions.filter((s) => {
+    if (!needle) return true;
+    const id = String(s.id || "").toLowerCase();
+    const student = String(s.student_id || "").toLowerCase();
+    const moduleCode = String(s.module_code || "").toLowerCase();
+    const assignmentCode = String(s.assignment_code || "").toLowerCase();
+    return (
+      id.includes(needle) ||
+      student.includes(needle) ||
+      moduleCode.includes(needle) ||
+      assignmentCode.includes(needle)
+    );
+  });
+
+  if (!filtered.length) {
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 6;
+    td.className = "muted";
+    td.textContent = "No sessions found.";
+    tr.appendChild(td);
+    indexSessionRowsEl.appendChild(tr);
+    return;
   }
-}
-function applyEventFilters() {
-  const role = roleFilter.value;
-  const needle = eventSearch.value.trim().toLowerCase();
-  const filtered = currentEvents.filter(
-    (e) =>
-      (role === "all" || e.role === role) &&
-      (!needle ||
-        String(e.content || "")
-          .toLowerCase()
-          .includes(needle)),
-  );
-  renderEvents(filtered);
-}
-function renderEvents(list) {
-  eventsEl.innerHTML = "";
-  let cU = 0,
-    cA = 0;
-  let first = null,
-    last = null;
 
-  list.forEach((e) => {
-    if (e.role === "user") cU++;
-    if (e.role === "assistant") cA++;
-    const t = new Date(e.created_at);
-    if (!first || t < first) first = t;
-    if (!last || t > last) last = t;
+  filtered.forEach((s) => {
+    const tr = document.createElement("tr");
 
-    const li = document.createElement("li");
-    li.className = "list-item";
-    li.innerHTML = `<div class="title">${e.role.toUpperCase()} — ${t.toLocaleString()}</div><p>${e.content || ""}</p>`;
-    eventsEl.appendChild(li);
+    const studentTd = document.createElement("td");
+    studentTd.textContent = s.student_id || "–";
+    tr.appendChild(studentTd);
+
+    const moduleTd = document.createElement("td");
+    moduleTd.textContent = s.module_code || "–";
+    tr.appendChild(moduleTd);
+
+    const aCodeTd = document.createElement("td");
+    aCodeTd.textContent = s.assignment_code || "–";
+    tr.appendChild(aCodeTd);
+
+    const createdTd = document.createElement("td");
+    const dt = s.created_at ? new Date(s.created_at) : null;
+    createdTd.textContent = dt ? dt.toLocaleString() : "–";
+    tr.appendChild(createdTd);
+
+    const statusTd = document.createElement("td");
+    statusTd.textContent = s.locked_at ? "Submitted" : "Active";
+    tr.appendChild(statusTd);
+
+    const idxTd = document.createElement("td");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "btn btn-small";
+    btn.textContent = "Open";
+    btn.addEventListener("click", async () => {
+      await openAiIndexForSession(s.id);
+    });
+    idxTd.appendChild(btn);
+    tr.appendChild(idxTd);
+
+    indexSessionRowsEl.appendChild(tr);
   });
-
-  countUserEl.textContent = String(cU);
-  countAssistantEl.textContent = String(cA);
-  firstAtEl.textContent = first ? first.toLocaleString() : "–";
-  lastAtEl.textContent = last ? last.toLocaleString() : "–";
 }
 
-function selectSession(s) {
-  currentSession = s;
-  selEl.textContent = `Selected: ${s.id}`;
-  loadEvents();
-}
-
-function toCsvRow(arr) {
-  return arr
-    .map((v) => {
-      const s = String(v ?? "");
-      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-    })
-    .join(",");
-}
-function download(name, text) {
-  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = name;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1200);
-}
-function exportCsv() {
-  if (!currentSession) return;
-  const head = ["created_at", "session_id", "role", "content", "tokens"];
-  const rows = currentEvents.map((e) => [
-    e.created_at,
-    currentSession.id,
-    e.role,
-    e.content,
-    e.tokens ?? "",
-  ]);
-  const csv = [toCsvRow(head), ...rows.map(toCsvRow)].join("\n");
-  download(`wurksy_${currentSession.id}_events.csv`, csv);
-}
-async function copyTranscript() {
-  if (!currentEvents.length) return;
-  const lines = currentEvents.map(
-    (e) =>
-      `[${new Date(e.created_at).toISOString()}] ${e.role.toUpperCase()}: ${e.content}`,
-  );
-  await navigator.clipboard.writeText(lines.join("\n"));
-  setStatus("Transcript copied");
-}
-async function generateIndex() {
-  if (!currentSession) return;
+async function openAiIndexForSession(sessionId) {
+  if (!sessionId) return;
   setStatus("Generating AI Index…");
   try {
     const r = await fetch(
-      `/api/ai-index?sessionId=${encodeURIComponent(currentSession.id)}`,
+      `/api/ai-index?sessionId=${encodeURIComponent(sessionId)}`,
     );
     const j = await r.json();
-    if (j.url) window.open(j.url, "_blank", "noopener");
-    setStatus(j.url ? "AI Index ready" : j.error || "Failed");
-  } catch (e) {
-    setStatus(e.message);
-  }
-}
-
-// flags
-async function loadFlagsForSession(sessionId) {
-  try {
-    const p = { admin_key: ADMIN_KEY, sessionId };
-    const j = await fetchJSON(`/api/admin/flags?${qs(p)}`);
-    const level = j.summary?.level || "none";
-    flagLevelEl.textContent = level;
-    flagSummaryEl.innerHTML = "";
-    const counts = j.summary?.counts || {};
-    const keys = Object.keys(counts);
-    if (!keys.length) {
-      const li = document.createElement("li");
-      li.className = "list-item";
-      li.textContent = "No flags";
-      flagSummaryEl.appendChild(li);
+    if (j.error) throw new Error(j.error);
+    if (j.url) {
+      window.open(j.url, "_blank", "noopener");
+      setStatus("AI Index opened");
     } else {
-      keys.sort((a, b) => counts[b] - counts[a]);
-      keys.forEach((k) => {
-        const li = document.createElement("li");
-        li.className = "list-item";
-        li.textContent = `${k} — ${counts[k]}`;
-        flagSummaryEl.appendChild(li);
-      });
+      setStatus("AI Index URL missing");
     }
   } catch (e) {
-    flagLevelEl.textContent = "error";
+    setStatus(e.message || "AI Index failed");
   }
-}
-async function scanFlags() {
-  if (!ADMIN_KEY) {
-    setStatus("Enter ADMIN_KEY first");
-    return;
-  }
-  setStatus("Scanning flags…");
-  flagListEl.innerHTML = "";
-  flagScanSection.style.display = "block";
-  try {
-    const p = {
-      admin_key: ADMIN_KEY,
-      from: fromDateEl.value || undefined,
-      to: toDateEl.value || undefined,
-    };
-    const j = await fetchJSON(`/api/admin/flags?${qs(p)}`);
-    const items = j.items || [];
-    if (!items.length) {
-      flagListEl.innerHTML = `<li class="list-item">No risky sessions found in range.</li>`;
-      setStatus("No risk found");
-      return;
-    }
-    items.forEach((it) => {
-      const li = document.createElement("li");
-      li.className = "list-item";
-      li.innerHTML = `
-        <div class="title">${it.sessionId} — score ${it.score} (${it.level})</div>
-        <div class="muted">${new Date(it.created_at).toLocaleString()}</div>
-        <div class="muted">${Object.entries(it.counts)
-          .map(([k, v]) => `${k}:${v}`)
-          .join(" • ")}</div>
-      `;
-      li.style.cursor = "pointer";
-      li.addEventListener("click", () => {
-        // jump to session
-        queryEl.value = it.sessionId;
-        loadSessions(1).then(() => {
-          const found = sessions.find((s) => s.id === it.sessionId);
-          if (found) selectSession(found);
-        });
-      });
-      flagListEl.appendChild(li);
-    });
-    setStatus(`Found ${items.length} risky sessions`);
-  } catch (e) {
-    setStatus(e.message);
-  }
-}
-async function bulkExport() {
-  if (!ADMIN_KEY) {
-    setStatus("Enter ADMIN_KEY first");
-    return;
-  }
-  setStatus("Preparing export…");
-  const p = {
-    admin_key: ADMIN_KEY,
-    from: fromDateEl.value || undefined,
-    to: toDateEl.value || undefined,
-  };
-  const url = `/api/admin/export?${qs(p)}`;
-  const a = document.createElement("a");
-  a.href = url;
-  a.target = "_blank";
-  a.rel = "noopener";
-  a.click();
-  setStatus("Export started");
 }
 
-// wiring
+// ---------- wiring ----------
 saveKeyBtn.addEventListener("click", saveKey);
-loadBtn.addEventListener("click", () => loadSessions(1));
-prevPageBtn.addEventListener("click", () => {
-  if (curPage > 1) loadSessions(curPage - 1);
-});
-nextPageBtn.addEventListener("click", () => loadSessions(curPage + 1));
-sortByDateBtn.addEventListener("click", () => {
-  sortNewest = !sortNewest;
-  renderSessions();
-});
 
-refreshEventsBtn.addEventListener("click", loadEvents);
-roleFilter.addEventListener("change", applyEventFilters);
-eventSearch.addEventListener("input", applyEventFilters);
-exportCsvBtn.addEventListener("click", exportCsv);
-copyTranscriptBtn.addEventListener("click", copyTranscript);
-genIndexBtn.addEventListener("click", generateIndex);
-
-autoRefresh.addEventListener("change", () => {
-  if (autoRefresh.checked) {
-    refreshTimer = setInterval(() => loadSessions(curPage), 30000);
-  } else if (refreshTimer) {
-    clearInterval(refreshTimer);
-    refreshTimer = null;
-  }
-});
-
-scanFlagsBtn.addEventListener("click", scanFlags);
-bulkExportBtn.addEventListener("click", bulkExport);
+refreshSessionsBtn.addEventListener("click", loadSessions);
+sessionFilterEl.addEventListener("input", () => renderSessions());
 
 // boot
 loadKey();
-setStatus("Enter ADMIN_KEY, set range, click Load.");
+showTab("create");
+currentStep = 1;
+updateStepUI();
+setStatus("Enter ADMIN_KEY to begin.");

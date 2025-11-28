@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <title>Wurksy – Research</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <!-- page-scoped styles -->
+    <style>
+      /* Chat bubbles for answers */
+      #answer {
+        list-style: none;
+        padding: 0;
+        margin: 12px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        user-select: none;
+      }
+      #answer li {
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        max-width: 95%;
+      }
+      #answer li.user {
+        align-self: flex-end;
+        background: rgba(34, 211, 238, 0.1);
+      }
+      #answer li.assistant {
+        background: rgba(96, 165, 250, 0.08);
+      }
+
+      /* Viewer container */
+      #viewer {
+        position: relative;
+      }
+    </style>
+    <script src="/theme.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <nav class="nav">
+        <a class="brand" href="/index.html">
+          <img src="/logo.svg" alt="Wurksy AI logo" onerror="this.remove()" />
+          <span class="brand-text">
+            <span class="brand-name">Wurksy AI</span>
+          </span>
+        </a>
+        <div class="links">
+          <a href="/index.html">Chat</a>
+          <a href="/lectures.html">Lectures</a>
+          <a href="/research.html" class="active">Research</a>
+          <a href="/admin.html">Admin</a>
+          <a href="/demo.html">Demo</a>
+          <a class="nav-link" href="/auth/logout" title="Sign out">Sign out</a>
+          <button id="themeToggle" class="themebtn" type="button">☾</button>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="card">
+        <div class="card-head">
+          <h1>Demo</h1>
+        </div>
+
+      </section>
+      
+      <script type="module" src="/demo.js"></script>
+    </main>
+
+    <script type="module" src="/research.js"></script>
+  </body>
+</html>

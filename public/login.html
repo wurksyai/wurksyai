@@ -6,6 +6,7 @@
     <title>Wurksy AI — Sign in</title>
     <link rel="stylesheet" href="/styles.css" />
     <link rel="icon" href="/assets/generated-icon.png" />
+
     <style>
       /* background glow */
       body {
@@ -23,7 +24,6 @@
           var(--bg);
       }
 
-      /* center card */
       .wrap {
         min-height: 100dvh;
         display: grid;
@@ -39,7 +39,6 @@
         box-shadow: var(--shadow);
       }
 
-      /* brand (bigger) */
       .brand-row {
         display: flex;
         align-items: center;
@@ -53,21 +52,18 @@
         height: 44px;
       }
       .brand-text {
-        line-height: 1.1;
         display: flex;
         flex-direction: column;
       }
       .brand-text .name {
         font-size: 22px;
         font-weight: 800;
-        letter-spacing: 0.2px;
       }
       .brand-text .tag {
         font-size: 12px;
         color: var(--muted);
       }
 
-      /* heading row */
       .hdr {
         display: flex;
         align-items: center;
@@ -99,16 +95,16 @@
         font-size: 14px;
       }
 
-      /* form */
-      .row {
-        display: grid;
-        gap: 12px;
-      }
       label {
         font-size: 13px;
         display: grid;
         gap: 6px;
       }
+      .row {
+        display: grid;
+        gap: 12px;
+      }
+
       .input-wrap {
         position: relative;
       }
@@ -131,9 +127,6 @@
         place-items: center;
         cursor: pointer;
       }
-      .eye:hover {
-        box-shadow: 0 0 0 3px var(--ring);
-      }
 
       .actions {
         display: flex;
@@ -144,141 +137,234 @@
       .hint {
         font-size: 12px;
         color: var(--muted);
-        margin-top: 6px;
       }
-      #err {
+      #errAdmin,
+      #errStudent {
         color: #ffb3b3;
       }
 
-      /* footer */
       .foot {
         display: flex;
         justify-content: space-between;
-        align-items: center;
         margin-top: 12px;
       }
       .link {
         color: var(--accent);
         text-decoration: none;
       }
-      .link:hover {
-        text-decoration: underline;
-      }
-
-      @media (max-width: 480px) {
-        .brand-logo {
-          width: 36px;
-          height: 36px;
-        }
-        .brand-text .name {
-          font-size: 20px;
-        }
-      }
     </style>
+
     <script src="/theme.js" defer></script>
   </head>
+
   <body>
     <main class="wrap">
-      <section
-        class="card-lg"
-        role="dialog"
-        aria-labelledby="title"
-        aria-modal="true"
-      >
+      <section class="card-lg">
         <a class="brand-row" href="/login.html">
-          <img
-            src="/logo.svg"
-            alt="Wurksy"
-            class="brand-logo"
-            onerror="this.style.display='none'"
-          />
+          <img src="/logo.svg" alt="Wurksy" class="brand-logo" />
           <span class="brand-text">
             <span class="name">Wurksy AI</span>
             <span class="tag">Work easy with Wurksy</span>
           </span>
         </a>
 
-        <div class="hdr">
-          <div class="badge-ico">🔒</div>
-          <div>
-            <h1 id="title" class="title">Sign in</h1>
-            <p class="sub">Enter the access password to continue.</p>
+        <!-- STUDENT ASSIGNMENT LOGIN (hidden by default) -->
+        <div id="studentBlock" style="display: none">
+          <div class="hdr">
+            <div class="badge-ico">🧑‍🎓</div>
+            <div>
+              <h1 class="title">Start assignment</h1>
+              <p class="sub">Enter your details to begin.</p>
+            </div>
           </div>
-        </div>
 
-        <form id="loginForm" class="row" autocomplete="off">
-          <label
-            >Password
-            <span class="input-wrap">
+          <div id="assMeta" class="hint" style="margin-bottom: 10px"></div>
+
+          <form id="studentForm" class="row" autocomplete="off">
+            <label
+              >Student ID
               <input
-                id="password"
-                type="password"
-                placeholder="••••••••"
+                id="studentId"
+                type="text"
+                placeholder="e.g. 21012345"
                 required
               />
-              <button
-                type="button"
-                id="toggleEye"
-                class="eye"
-                aria-label="Show password"
-              >
-                👁️
-              </button>
-            </span>
-          </label>
+            </label>
+            <label
+              >Module code
+              <input
+                id="studentModule"
+                type="text"
+                placeholder="e.g. BS3201"
+                required
+              />
+            </label>
+            <div class="actions">
+              <button type="submit" class="btn btn-primary">Start</button>
+            </div>
+            <p id="errStudent" class="hint"></p>
+          </form>
+        </div>
 
-          <div class="actions">
-            <button type="submit" class="btn btn-primary">Sign in</button>
+        <!-- ADMIN LOGIN AREA -->
+        <div id="adminBlock">
+          <div class="hdr">
+            <div class="badge-ico">🔒</div>
+            <div>
+              <h1 class="title">Sign in</h1>
+              <p class="sub">Enter the admin password to continue.</p>
+            </div>
           </div>
 
-          <p id="err" class="hint" role="status" aria-live="polite"></p>
-        </form>
+          <form id="loginForm" class="row" autocomplete="off">
+            <label
+              >Password
+              <span class="input-wrap">
+                <input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  required
+                />
+                <button type="button" id="toggleEye" class="eye">👁️</button>
+              </span>
+            </label>
+            <div class="actions">
+              <button type="submit" class="btn btn-primary">Sign in</button>
+            </div>
+            <p id="errAdmin" class="hint"></p>
+          </form>
 
-        <div class="foot">
-          <span class="hint"
-            >Forgot the access password? Contact your module lead.</span
-          >
-          <a class="link" href="/health" target="_blank" rel="noopener"
-            >System status</a
-          >
+          <div class="foot">
+            <span class="hint">Staff only. Students use assignment links.</span>
+            <a href="/health" class="link" target="_blank">System status</a>
+          </div>
         </div>
       </section>
     </main>
 
     <script type="module">
-      const form = document.querySelector("#loginForm");
+      const params = new URLSearchParams(location.search);
+      const code = params.get("a");
+
+      const adminBlock = document.querySelector("#adminBlock");
+      const studentBlock = document.querySelector("#studentBlock");
+      const assMeta = document.querySelector("#assMeta");
+
+      /* ---------------------
+         1. If ?a=CODE → Student login flow
+      ---------------------- */
+      if (code) {
+        adminBlock.style.display = "none";
+        studentBlock.style.display = "block";
+
+        // Load assignment data
+        fetch(`/api/assignments/${encodeURIComponent(code)}`)
+          .then((r) => r.json())
+          .then((a) => {
+            if (a.error) {
+              assMeta.textContent = "Invalid or expired assignment link.";
+              return;
+            }
+            assMeta.innerHTML = `
+              <b>${a.module_code}</b> — ${a.title}<br>
+              Deadline: ${
+                a.deadline ? new Date(a.deadline).toLocaleString() : "None"
+              }<br>
+              Prompt cap: ${a.prompt_cap}
+            `;
+          })
+          .catch(() => (assMeta.textContent = "Could not load assignment."));
+      }
+
+      /* ---------------------
+         2. Student form submit → start assignment-aware session
+      ---------------------- */
+      const studentForm = document.querySelector("#studentForm");
+      if (studentForm) {
+        studentForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const studentId = document.querySelector("#studentId").value.trim();
+          const studentModule = document
+            .querySelector("#studentModule")
+            .value.trim();
+          const err = document.querySelector("#errStudent");
+          err.textContent = "";
+
+          if (!studentId || !studentModule) {
+            err.textContent = "Both fields required.";
+            return;
+          }
+
+          try {
+            const r = await fetch("/api/start", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                mode: "student",
+                assignmentCode: code,
+                studentId,
+                moduleCode: studentModule,
+              }),
+            });
+            const j = await r.json();
+            if (!r.ok || j.error || !j.sessionId) {
+              throw new Error(j.error || "Could not start session.");
+            }
+
+            // Save session meta in localStorage, keyed by assignment code
+            const suffix = code ? `_${code}` : "_global";
+            const sessionKey = `wurksy_session${suffix}`;
+            try {
+              localStorage.setItem(sessionKey, j.sessionId);
+              localStorage.setItem("wurksy_student_id", studentId);
+              localStorage.setItem("wurksy_student_module", studentModule);
+              if (code) {
+                localStorage.setItem("wurksy_assignment_code", code);
+              }
+            } catch {
+              // ignore storage errors
+            }
+
+            // redirect to chat with assignment in URL so app.js can pick it up
+            if (code) {
+              location.href = `/index.html?a=${encodeURIComponent(code)}`;
+            } else {
+              location.href = "/index.html";
+            }
+          } catch (e2) {
+            err.textContent = e2.message || "Could not start session.";
+          }
+        });
+      }
+
+      /* ---------------------
+         3. Admin login area
+      ---------------------- */
+      const loginForm = document.querySelector("#loginForm");
       const pwd = document.querySelector("#password");
-      const err = document.querySelector("#err");
+      const errAdmin = document.querySelector("#errAdmin");
       const eye = document.querySelector("#toggleEye");
 
-      // Toggle password visibility
       eye.addEventListener("click", () => {
         const show = pwd.type === "password";
         pwd.type = show ? "text" : "password";
         eye.textContent = show ? "🙈" : "👁️";
-        eye.setAttribute(
-          "aria-label",
-          show ? "Hide password" : "Show password",
-        );
-        pwd.focus();
       });
 
-      // Submit
-      form.addEventListener("submit", async (e) => {
+      loginForm?.addEventListener("submit", async (e) => {
         e.preventDefault();
-        err.textContent = "";
         const r = await fetch("/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ password: pwd.value }),
         });
         if (r.ok) {
-          location.href = "/";
+          location.href = "/admin.html";
         } else {
           const j = await r.json().catch(() => ({}));
-          err.textContent = j.error || "Sign-in failed";
+          errAdmin.textContent = j.error || "Login failed";
           pwd.value = "";
-          pwd.focus();
         }
       });
     </script>

@@ -42,15 +42,30 @@ const questionEl = $("#question");
 const askBtn = $("#askBtn");
 const answerEl = $("#answer");
 
-// -------- session (for AI Index logging) --------
+// -------- shared session (for AI Index logging) --------
 let sessionId = null;
-async function getSession() {
+
+async function ensureSession() {
   if (sessionId) return sessionId;
-  const cached = localStorage.getItem("wurksy_session_id");
-  if (cached) {
-    sessionId = cached;
+
+  let existing = null;
+  try {
+    // prefer new key, fall back to old, then migrate
+    existing =
+      localStorage.getItem("wurksy_session") ||
+      localStorage.getItem("wurksy_session_id") ||
+      null;
+  } catch {}
+
+  if (existing) {
+    sessionId = existing;
+    try {
+      localStorage.setItem("wurksy_session", sessionId);
+    } catch {}
     return sessionId;
   }
+
+  // No existing session anywhere → start one guest session
   const r = await fetch("/api/start", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -59,7 +74,9 @@ async function getSession() {
   const j = await r.json();
   if (!r.ok || j.error) throw new Error(j.error || "Failed to start session");
   sessionId = j.sessionId;
-  localStorage.setItem("wurksy_session_id", sessionId);
+  try {
+    localStorage.setItem("wurksy_session", sessionId);
+  } catch {}
   return sessionId;
 }
 
@@ -110,10 +127,7 @@ function renderBullets(text) {
 function escapeHTML(s) {
   return String(s || "").replace(
     /[&<>"']/g,
-    (m) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
-        m
-      ],
+    (m) => ({ "&": "&amp;", "<": "&gt;", '"': "&quot;", "'": "&#39;" })[m],
   );
 }
 
@@ -158,19 +172,40 @@ function resultRow(it) {
   li.appendChild(tiny);
   li.appendChild(rowBtns);
 
-  li.addEventListener("click", () => selectItem(it));
+  li.addEventListener("click", () => {
+    // fire-and-forget async; we don't await so UI stays snappy
+    void selectItem(it);
+  });
   return li;
 }
 
-function selectItem(it) {
+// NEW: record that the student opened / selected a paper
+async function recordPaperClick(it) {
+  try {
+    await ensureSession();
+    await fetch("/api/papers/click", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId, meta: it }),
+    });
+  } catch {
+    // swallow – logging failure shouldn't break the UI
+  }
+}
+
+async function selectItem(it) {
   current = it;
   paperTitleEl.textContent = it.title || "Untitled";
   metaEl.textContent = metaLine(it);
   abstractEl.textContent = it.abstract || "(no abstract available)";
   lastExtractedText = "";
   pdfTextEl.textContent = "";
+
+  // log + save research artifact for AI Index
+  await recordPaperClick(it);
+
   // keep chat history visible; don't clear
-  loadForViewing(it);
+  await loadForViewing(it);
 }
 
 // ---------- PDF helpers ----------
@@ -266,10 +301,12 @@ openPdfBtn.addEventListener("click", () => {
 
 // ---------- resolver + auto-extraction ----------
 async function resolvePdfFor(it) {
+  await ensureSession();
   const params = new URLSearchParams();
   if (it.doi) params.set("doi", String(it.doi));
   if (it.url) params.set("url", String(it.url));
   if (it.oa_pdf) params.set("oa_pdf", String(it.oa_pdf));
+  if (sessionId) params.set("sessionId", sessionId); // for AI Index logging
   const j = await getJSON(`/api/papers/resolve?${params.toString()}`);
   return j; // { pdf, landing }
 }
@@ -311,7 +348,7 @@ async function extractPdfFromUrl(url) {
   return chunks.join("\n\n");
 }
 
-// --- replace your current citations & bibliography section with this ---
+// --- citations & bibliography ---
 
 import("/harvard_uol.js").then(({ formatHarvardUoL }) => {
   const ACCESS_DYNAMIC = null; // null = use today's date; or set "7 November 2025"
@@ -324,14 +361,16 @@ import("/harvard_uol.js").then(({ formatHarvardUoL }) => {
       const venue = meta.journal || meta.venue || "";
       const year = meta.year || "";
       const url = meta.doi
-        ? `https://doi.org/${String(meta.doi).replace(/^https?:\/\/doi\.org\//i, "")}`
+        ? `https://doi.org/${String(meta.doi).replace(
+            /^https?:\/\/doi\.org\//i,
+            "",
+          )}`
         : meta.url || "";
       return `${author}. ${title}. ${venue}. ${year}. ${url}`
         .replace(/\s+\./g, ". ")
         .trim();
     }
     // default: Harvard (UoL)
-    // map incoming meta fields to the formatter's expectations
     const mapped = {
       author: meta.author,
       year: meta.year,
@@ -346,7 +385,6 @@ import("/harvard_uol.js").then(({ formatHarvardUoL }) => {
       place: meta.place,
       publisher: meta.publisher,
       edition: meta.edition,
-      // optional extended fields (if you ever add them later)
       editors: meta.editors,
       chapter: meta.chapter,
       bookTitle: meta.bookTitle || meta.container_title,
@@ -392,7 +430,7 @@ import("/harvard_uol.js").then(({ formatHarvardUoL }) => {
 
 // ---------- Wurksy Q&A ----------
 async function askWurksy(prompt, contextOverride) {
-  if (!sessionId) await getSession();
+  await ensureSession();
 
   const contextText = String(
     contextOverride || lastExtractedText || abstractEl.textContent || "",
@@ -421,11 +459,11 @@ async function askWurksy(prompt, contextOverride) {
     body: JSON.stringify({
       sessionId,
       message: userMsg,
-      channel: "research",
+      channel: "research", // logged in chat_events
     }),
   });
   const j = await r.json();
-  if (!r.ok) throw new Error(j.error || "Ask failed");
+  if (!r.ok || j.error) throw new Error(j.error || "Ask failed");
   return j.reply;
 }
 
@@ -559,10 +597,14 @@ form.addEventListener("submit", async (e) => {
   e.preventDefault();
   const term = qEl.value.trim();
   if (!term) return;
-  setStatus("Searching…");
   resultsEl.innerHTML = "";
   try {
-    const j = await getJSON(`/api/papers/search?q=${encodeURIComponent(term)}`);
+    await ensureSession();
+    setStatus("Searching…");
+    const url =
+      `/api/papers/search?q=${encodeURIComponent(term)}` +
+      (sessionId ? `&sessionId=${encodeURIComponent(sessionId)}` : "");
+    const j = await getJSON(url);
     (j.items || []).forEach((it) => resultsEl.appendChild(resultRow(it)));
     if (!j.items?.length)
       resultsEl.innerHTML = `<li class="muted">No results.</li>`;

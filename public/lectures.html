@@ -247,6 +247,10 @@
             <a href="/lectures.html" class="active">Lectures</a>
             <a href="/research.html">Research</a>
             <a href="/admin.html">Admin</a>
+            <a href="/demo.html">Demo</a>
+            <a class="nav-link" href="/auth/logout" title="Sign out"
+              >Sign out</a
+            >
           </nav>
         </div>
         <div class="actions">
@@ -266,7 +270,11 @@
           <strong>Upload lecture (PDF)</strong>
           <input id="titleInput" type="text" placeholder="Optional title" />
           <div class="row">
-            <input id="fileInput" type="file" accept="application/pdf" />
+            <input
+              id="fileInput"
+              type="file"
+              accept="application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+            />
             <button id="uploadBtn" class="primary">Upload</button>
           </div>
           <small id="uploadStatus" class="doc-subtle"></small>
@@ -358,15 +366,11 @@
       <aside class="chat" aria-label="Questions about this lecture">
         <div class="chat-head">
           <strong>Ask about this lecture</strong>
-          <span class="doc-subtle">Context: current lecture only</span>
         </div>
         <div id="qaThread" class="chat-body" aria-live="polite"></div>
         <form id="qaForm" class="chat-input">
           <label for="qaInput" class="sr-only">Your question</label>
-          <textarea
-            id="qaInput"
-            placeholder="Ask Wurksy AI..."
-          ></textarea>
+          <textarea id="qaInput" placeholder="Ask Wurksy AI..."></textarea>
           <button
             id="qaSend"
             type="submit"

@@ -21,147 +21,276 @@
           <a href="/lectures.html">Lectures</a>
           <a href="/research.html">Research</a>
           <a href="/admin.html" class="active">Admin</a>
+          <a href="/demo.html">Demo</a>
+          <a class="nav-link" href="/auth/logout" title="Sign out">Sign out</a>
           <button id="themeToggle" class="themebtn" type="button">☾</button>
         </div>
       </nav>
     </header>
 
     <main>
+      <!-- Top admin key + status -->
       <section class="card">
         <div class="card-head">
-          <h1>Admin Dashboard</h1>
+          <h1>Wurksy Admin</h1>
           <div id="status" class="muted">Idle</div>
         </div>
+        <div class="row" style="gap: 8px; flex-wrap: wrap">
+          <input
+            id="adminKey"
+            type="text"
+            placeholder="ADMIN_KEY"
+            style="min-width: 180px"
+          />
+          <button id="saveKey" class="btn" type="button">Save key</button>
+        </div>
 
-        <div class="row" style="flex-wrap: wrap; gap: 8px">
-          <input id="adminKey" type="text" placeholder="ADMIN_KEY" />
-          <button id="saveKey" class="btn" type="button">Save</button>
-
-          <input id="fromDate" type="date" />
-          <input id="toDate" type="date" />
-          <input id="query" type="search" placeholder="Search session ID…" />
-          <select id="pageSize">
-            <option>25</option>
-            <option selected>50</option>
-            <option>100</option>
-            <option>200</option>
-          </select>
-          <button id="loadSessions" class="btn btn-primary" type="button">
-            Load
-          </button>
-          <label
-            class="muted"
-            style="display: flex; align-items: center; gap: 6px"
-          >
-            <input id="autoRefresh" type="checkbox" />
-            Auto-refresh
-          </label>
+        <!-- Tabs -->
+        <div
+          class="row"
+          style="
+            margin-top: 12px;
+            gap: 6px;
+            flex-wrap: wrap;
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
+          "
+        >
           <button
-            id="bulkExport"
-            class="btn"
+            class="btn btn-pill tab-btn active"
             type="button"
-            title="ZIP with CSV + AI Index PDFs"
+            data-tab-btn="create"
           >
-            Bulk Export
+            Create assignment
           </button>
           <button
-            id="scanFlags"
-            class="btn"
+            class="btn btn-pill tab-btn"
             type="button"
-            title="Risky sessions in range"
+            data-tab-btn="indexes"
           >
-            Scan Flags
+            View AI Index
+          </button>
+          <button
+            class="btn btn-pill"
+            type="button"
+            data-tab-btn="analytics"
+            disabled
+            title="Coming soon"
+          >
+            Analytics (soon)
           </button>
         </div>
       </section>
 
-      <section class="grid">
-        <!-- Sessions panel -->
-        <div class="card">
-          <div class="card-head">
-            <h2>Sessions</h2>
-            <div class="row">
-              <span class="muted">Total: <b id="totalSessions">0</b></span>
-              <span class="muted">Showing: <b id="visibleSessions">0</b></span>
-            </div>
-          </div>
-
-          <div class="row" style="justify-content: space-between">
-            <button id="prevPage" class="btn" type="button">Prev</button>
-            <div class="muted">Page <b id="pageNum">1</b></div>
-            <button id="nextPage" class="btn" type="button">Next</button>
-            <button id="sortByDate" class="btn" type="button">
-              Sort: Newest
-            </button>
-          </div>
-
-          <ul
-            id="sessions"
-            class="list"
-            style="margin-top: 8px; max-height: 60vh; overflow: auto"
-          ></ul>
-        </div>
-
-        <!-- Events / details -->
-        <div class="card">
-          <div class="card-head">
-            <h2>Session details</h2>
-            <div id="sel" class="muted">No session selected</div>
-          </div>
-
-          <div class="row">
-            <button id="refreshEvents" class="btn" type="button">
-              Refresh
-            </button>
-            <button id="exportCsv" class="btn" type="button">Export CSV</button>
-            <button id="copyTranscript" class="btn" type="button">
-              Copy transcript
-            </button>
-            <button id="genIndex" class="btn btn-primary" type="button">
-              Generate AI Index
-            </button>
-          </div>
-
-          <div class="row" style="margin-top: 10px">
-            <select id="roleFilter">
-              <option value="all">All roles</option>
-              <option value="user">User</option>
-              <option value="assistant">Assistant</option>
-            </select>
-            <input
-              id="eventSearch"
-              type="search"
-              placeholder="Search event text…"
-            />
-          </div>
-
-          <div class="list-item" style="margin-top: 10px">
-            <div class="row">
-              <div>Prompts: <b id="countUser">0</b></div>
-              <div>Replies: <b id="countAssistant">0</b></div>
-              <div>First: <b id="firstAt">–</b></div>
-              <div>Last: <b id="lastAt">–</b></div>
-              <div>Flags: <b id="flagLevel">none</b></div>
-            </div>
-          </div>
-
-          <ul
-            id="events"
-            class="list"
-            style="margin-top: 8px; max-height: 48vh; overflow: auto"
-          ></ul>
-
-          <h3 style="margin-top: 12px">Flag summary</h3>
-          <ul id="flagSummary" class="list"></ul>
-        </div>
-      </section>
-
-      <section class="card" id="flagScanSection" style="display: none">
+      <!-- TAB 1: Create assignment (wizard-style) -->
+      <section class="card" data-tab="create">
         <div class="card-head">
-          <h2>Risky sessions in range</h2>
-          <div class="muted">Heuristic: essay requests, humanisation, etc.</div>
+          <h2>Create new assignment</h2>
+          <div class="muted">Step <span id="stepNum">1</span> of 3</div>
         </div>
-        <ul id="flagList" class="list"></ul>
+
+        <!-- Step indicator -->
+        <div
+          class="row"
+          style="
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            align-items: center;
+          "
+        >
+          <span id="stepLabel" class="muted">Basics</span>
+        </div>
+
+        <!-- Wizard steps -->
+        <div class="row" style="gap: 16px">
+          <!-- Step 1 -->
+          <div class="row assignment-step" data-step="1">
+            <label>
+              Module code
+              <input
+                id="assModuleCode"
+                type="text"
+                placeholder="e.g. BS3201"
+                required
+              />
+            </label>
+
+            <label>
+              Assignment title
+              <input
+                id="assTitle"
+                type="text"
+                placeholder="e.g. Analytical Project AI Sandbox"
+                required
+              />
+            </label>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="row assignment-step" data-step="2" style="display: none">
+            <label>
+              Deadline (optional)
+              <input
+                id="assDeadline"
+                type="datetime-local"
+                placeholder="dd/mm/yyyy --:--"
+              />
+            </label>
+
+            <label>
+              Prompt cap per student (max 100)
+              <input
+                id="assPromptCap"
+                type="number"
+                min="1"
+                max="100"
+                value="100"
+              />
+              <span class="hint"
+                >Students can send up to this many prompts for this
+                assignment.</span
+              >
+            </label>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="row assignment-step" data-step="3" style="display: none">
+            <label>
+              Brief / instructions shown to students
+              <textarea
+                id="assBrief"
+                rows="4"
+                placeholder="Paste the assignment brief here so students see it at the top of Wurksy."
+              ></textarea>
+            </label>
+
+            <label>
+              Recommended PDFs (optional)
+              <textarea
+                id="assRecommended"
+                rows="3"
+                placeholder="One URL per line, or a short search hint. These show in the Research tab as ‘Recommended PDFs’."
+              ></textarea>
+            </label>
+
+            <label>
+              Lecture files (coming soon)
+              <input type="file" multiple disabled />
+              <span class="hint"
+                >Lecture upload from Admin will be added later. For now, upload
+                resources through the Lectures tab.</span
+              >
+            </label>
+          </div>
+        </div>
+
+        <!-- Wizard navigation -->
+        <div
+          class="row"
+          style="margin-top: 12px; justify-content: space-between; gap: 8px"
+        >
+          <button
+            id="stepBack"
+            class="btn"
+            type="button"
+            style="min-width: 80px"
+          >
+            Back
+          </button>
+          <div style="display: flex; gap: 8px">
+            <button
+              id="stepNext"
+              class="btn btn-primary"
+              type="button"
+              style="min-width: 120px"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+
+        <!-- Result box -->
+        <div
+          id="createdAssignmentInfo"
+          class="card"
+          style="margin-top: 16px; display: none"
+        >
+          <div class="card-head">
+            <h3>Assignment created</h3>
+          </div>
+          <p class="muted">
+            Share this Wurksy link with your students. It is unique to this
+            assignment.
+          </p>
+          <code
+            id="createdAssignmentLink"
+            style="
+              display: block;
+              overflow-wrap: anywhere;
+              margin-bottom: 8px;
+              font-size: 13px;
+            "
+          ></code>
+          <button
+            id="copyCreatedAssignmentLink"
+            class="btn btn-small"
+            type="button"
+          >
+            Copy link
+          </button>
+        </div>
+      </section>
+
+      <!-- TAB 2: View AI Index -->
+      <section class="card" data-tab="indexes" style="display: none">
+        <div class="card-head">
+          <h2>Student AI Indexes</h2>
+          <p class="muted">
+            Shows sessions where students logged in with an assignment link.
+          </p>
+        </div>
+
+        <div class="row" style="gap: 8px; flex-wrap: wrap">
+          <input
+            id="sessionFilter"
+            type="search"
+            placeholder="Search by student ID, module, or assignment code…"
+            style="flex: 1 1 220px"
+          />
+          <button id="refreshSessions" class="btn" type="button">
+            Refresh
+          </button>
+        </div>
+
+        <div style="margin-top: 10px; overflow-x: auto">
+          <table class="table" style="min-width: 640px">
+            <thead>
+              <tr>
+                <th>Student ID</th>
+                <th>Module</th>
+                <th>Assignment code</th>
+                <th>Created</th>
+                <th>Status</th>
+                <th>AI Index</th>
+              </tr>
+            </thead>
+            <tbody id="indexSessionRows">
+              <!-- rows injected -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 3: Analytics (placeholder) -->
+      <section class="card" data-tab="analytics" style="display: none">
+        <div class="card-head">
+          <h2>Analytics</h2>
+        </div>
+        <p class="muted">
+          Analytics (per-module usage, prompts per assignment, red flags) will
+          be added here later.
+        </p>
       </section>
     </main>
 

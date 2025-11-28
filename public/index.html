@@ -6,14 +6,15 @@
     <title>Wurksy AI</title>
     <link rel="stylesheet" href="/styles.css" />
     <script defer src="/theme.js"></script>
+
     <style>
-      /* make bullets show one per line */
+      /* Message bullets */
       #msgs li {
         white-space: pre-wrap;
         user-select: none;
       }
 
-      /* clean, minimal modal */
+      /* Modal styling */
       .modal-backdrop {
         position: fixed;
         inset: 0;
@@ -34,36 +35,8 @@
         padding: 16px;
         box-shadow: var(--shadow);
       }
-      .modal h3 {
-        margin: 0 0 8px;
-      }
-      .modal .grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-      .modal .actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 8px;
-        margin-top: 10px;
-      }
-      .modal label {
-        font-size: 14px;
-        display: flex;
-        gap: 8px;
-        align-items: flex-start;
-      }
-      .modal input[type="text"] {
-        width: 100%;
-      }
-      @media (max-width: 700px) {
-        .modal .grid {
-          grid-template-columns: 1fr;
-        }
-      }
 
-      /* ChatGPT-like message bar */
+      /* Chat input bar */
       #send {
         display: flex;
         align-items: center;
@@ -73,48 +46,72 @@
         padding: 10px 14px;
         border-radius: 28px;
         margin-top: 10px;
-        color: var(--text)
       }
-
-      /* Make input fill the space */
       #send textarea {
         flex: 1;
         padding: 10px 4px;
-        line-height: 1.5;
         border: none;
-        outline: none;
         background: transparent;
+        resize: none;
+        max-height: 10em;
+        line-height: 1.5;
         font-size: 16px;
-        resize: none; /* important */
-        overflow: hidden; /* prevents scrollbar flash */
       }
 
-      /* Replace default button style */
-      #send button[type="submit"] {
-        width: 38px;
-        height: 38px;
-        padding: 0;
-        border-radius: 50%;
-        display: grid;
-        place-items: center;
-        font-size: 18px;
-        border: none;
-        cursor: pointer;
+      /* Assignment box height (brief) */
+      #assignmentCard {
+        max-height: 480px;
+        overflow: hidden;
+      }
+      #assignmentBrief {
+        max-height: 360px;
+        overflow-y: auto;
       }
 
-      /* Hover effect */
-      #send button[type="submit"]:hover {
-        opacity: 0.9;
+      /* Hero title + logo */
+      .hero-title {
+        display: flex;
+        align-items: center;
+        gap: 0px;
+      }
+      .hero-logo {
+        height: 48px;
+        width: 48px;
+        border-radius: 8px;
       }
 
-      /* Remove extra buttons from styling (optional) */
-      #makeIndex,
-      #submitBtn {
-        border-radius: 6px;
+      .cta {
+        display: flex;
+        gap: 12px;
+        margin-top: 12px;
       }
 
+      /* Recommended reading styles */
+      .recommended-wrap {
+        margin-top: 12px;
+        border-top: 1px solid var(--border-subtle, var(--border));
+        padding-top: 8px;
+      }
+      .recommended-wrap h4 {
+        font-size: 13px;
+        margin: 0 0 4px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .recommended-list {
+        list-style: none;
+        padding-left: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .recommended-list .list-item a {
+        font-size: 13px;
+      }
     </style>
   </head>
+
   <body>
     <!-- Top nav -->
     <header>
@@ -125,22 +122,19 @@
             alt="Wurksy AI logo"
             onerror="this.style.display='none'"
           />
-          <span class="brand-text">
-            <span class="brand-name">Wurksy AI</span>
-          </span>
+          <span class="brand-text"
+            ><span class="brand-name">Wurksy AI</span></span
+          >
         </a>
+
         <div class="links">
           <a class="active" href="/index.html">Chat</a>
           <a href="/lectures.html">Lectures</a>
           <a href="/research.html">Research</a>
           <a href="/admin.html">Admin</a>
-          <a class="nav-link" href="/auth/logout" title="Sign out">Sign out</a>
-          <button
-            id="themeToggle"
-            class="themebtn"
-            title="Toggle theme"
-            aria-label="Toggle theme"
-          >
+          <a href="/demo.html">Demo</a>
+          <a class="nav-link" href="/auth/logout">Sign out</a>
+          <button id="themeToggle" class="themebtn" title="Toggle theme">
             ☾
           </button>
         </div>
@@ -148,129 +142,140 @@
     </header>
 
     <main>
-      <!-- Hero -->
-      <section class="card hero-wrap">
-        <div class="hero">
-          <div class="hero-left">
-            <p class="badge">
-              Amber-mode academic assistant • logs • caps • integrity
-            </p>
-            <h1 class="title-xl">
-              Wurksy <span class="gradient-text">AI</span>
-            </h1>
-            <p class="slogan-under">Work easy with Wurksy</p>
-            <p class="subtitle">
-              A policy-aligned AI workspace for students. Upload lectures, read
-              papers in-app, ask focused questions, and export an AI Index for
-              submission.
-            </p>
-            <div class="cta">
-              <a class="btn btn-primary" href="#chat">Start Chat</a>
-              <a class="btn" href="/lectures.html">Upload Lectures</a>
-              <a class="btn" href="/research.html">Open Research</a>
+      <!-- Whole page stack: hero (with assignment meta), brief, chat -->
+      <section class="assignment-layout">
+        <!-- HERO with assignment meta on the right -->
+        <div class="card hero-wrap hero-card">
+          <div class="hero hero-row">
+            <!-- Left: logo + title + buttons -->
+            <div class="hero-main">
+              <p class="badge">
+                Amber-mode academic assistant • logs • caps • integrity
+              </p>
+
+              <h1 class="title-xl hero-title">
+                <img src="/logo.svg" class="hero-logo" alt="Wurksy logo" />
+                Wurksy <span class="gradient-text">AI</span>
+              </h1>
+
+              <div class="cta">
+                <a id="startChatBtn" class="btn btn-primary" href="#chat">
+                  Start Chat
+                </a>
+                <a class="btn" href="/lectures.html">Upload Lectures</a>
+                <a class="btn" href="/research.html">Open Research</a>
+              </div>
             </div>
+
+            <!-- Right: assignment meta injected by app.js -->
+            <aside id="assignmentHeader" class="assignment-meta"></aside>
           </div>
-          <div class="hero-side"></div>
-        </div>
-      </section>
-
-      <!-- Chat -->
-      <section id="chat" class="card chat-wrap">
-        <div class="chat-head">
-          <h2>Chat (Amber Mode)</h2>
-          <div id="cap" class="cap muted">Loading session…</div>
         </div>
 
-        <div class="policy small">
-          Amber policy: bullet-point scaffolding only; no ghost-writing or
-          “humanising” AI text.
-          <a class="link" href="/privacy.html" target="_blank" rel="noopener"
-            >Privacy</a
-          >
-          •
-          <a class="link" href="/terms.html" target="_blank" rel="noopener"
-            >Terms</a
-          >
-        </div>
+        <!-- BRIEF CARD (single compact bubble) -->
+        <section id="assignmentCard" class="card" style="display: none">
+          <div id="assignmentBrief" class="muted brief-bubble"></div>
 
-        <ul id="msgs" aria-live="polite"></ul>
+          <div class="recommended-wrap">
+            <h4>Recommended reading</h4>
+            <ul
+              id="assignmentRecommended"
+              class="recommended-list"
+              aria-label="Recommended reading for this assignment"
+            ></ul>
+          </div>
+        </section>
 
-        <form id="send" class="row" autocomplete="off">
-          <textarea
-            id="input"
-            placeholder="Ask Wurksy AI..."
-            aria-label="Message"
-            rows="1"
-          ></textarea>
-          <button type="submit" class="btn btn-primary">↑</button>
-          <button
-            id="makeIndex"
-            type="button"
-            class="btn"
-            title="Generate AI Index (PDF)"
-          >
-            AI Index
-          </button>
-          <button
-            id="submitBtn"
-            type="button"
-            class="btn"
-            title="Submit & lock this session"
-          >
-            Submit &amp; Lock
-          </button>
-        </form>
+        <!-- CHAT CARD -->
+        <section id="chat" class="card chat-wrap">
+          <!-- Top row: title, privacy/terms, notes chip, cap on right -->
+          <div class="chat-head">
+            <h2>Chat (Amber Mode)</h2>
 
-        <p class="muted">
-          Replies are concise, in bullets, and logged for your AI Index. Once
-          you press <strong>Submit &amp; Lock</strong>, the session locks and AI
-          access is disabled for this assignment.
-        </p>
+            <div class="chat-head-middle">
+              <a class="link" href="/privacy.html" target="_blank">Privacy</a> •
+              <a class="link" href="/terms.html" target="_blank"
+                >Terms &amp; conditions</a
+              >
+            </div>
+
+            <button
+              type="button"
+              class="notes-chip"
+              onclick="document.getElementById('sessionNotes')?.focus()"
+            >
+              Optional notes (e.g. other AI tools used)
+            </button>
+
+            <div id="cap" class="cap muted"></div>
+          </div>
+
+          <!-- Notes textarea directly under header -->
+          <div class="notes-row">
+            <textarea
+              id="sessionNotes"
+              placeholder="Add any notes you want recorded in your AI Index..."
+              rows="2"
+            ></textarea>
+            <p class="muted notes-hint">
+              These notes are saved when you press
+              <strong>Submit &amp; Lock</strong> and will appear in your AI
+              Index.
+            </p>
+          </div>
+
+          <ul id="msgs" aria-live="polite"></ul>
+
+          <form id="send" autocomplete="off">
+            <textarea
+              id="input"
+              placeholder="Ask Wurksy AI..."
+              rows="1"
+            ></textarea>
+            <button type="submit" class="btn btn-primary">↑</button>
+            <button id="makeIndex" type="button" class="btn">AI Index</button>
+            <button id="submitBtn" type="button" class="btn">
+              Submit &amp; Lock
+            </button>
+          </form>
+
+          <p class="muted" style="margin-top: 10px">
+            Replies are concise and logged. Once you press
+            <strong>Submit &amp; Lock</strong>, the session closes.
+          </p>
+        </section>
       </section>
     </main>
 
     <!-- AI Declaration Modal -->
-    <div id="declBackdrop" class="modal-backdrop" aria-hidden="true">
-      <div
-        class="modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="declTitle"
-      >
-        <h3 id="declTitle">AI Use Declaration (Amber-mode)</h3>
-        <p class="muted">
-          Tick all boxes to confirm correct use for this assignment.
-        </p>
+    <div id="declBackdrop" class="modal-backdrop">
+      <div class="modal" role="dialog" aria-modal="true">
+        <h3>AI Use Declaration (Amber-mode)</h3>
+        <p class="muted">Tick all boxes to confirm correct use.</p>
 
-        <div class="grid" style="margin: 8px 0 4px">
+        <div class="grid" style="margin: 8px 0">
           <label
             ><input type="checkbox" id="d_onlyWurksy" /> Wurksy was the only AI
-            tool I used (except Grammarly/Canva).</label
+            tool I used.</label
           >
           <label
-            ><input type="checkbox" id="d_noGhost" /> I did not copy, paraphrase
-            or “humanise” AI text into my submission.</label
+            ><input type="checkbox" id="d_noGhost" /> I did not copy or
+            “humanise” AI text.</label
           >
           <label
             ><input type="checkbox" id="d_independent" /> The final submission
-            is my own independent work.</label
+            is my own work.</label
           >
           <label
             ><input type="checkbox" id="d_understand" /> I understand
-            non-compliance = academic malpractice.</label
+            non-compliance = malpractice.</label
           >
         </div>
 
-        <div class="grid" style="margin: 6px 0">
-          <label
-            >Assignment ID (e.g., <code>239012562_BS2016</code>)
-            <input
-              id="d_assgn"
-              type="text"
-              placeholder="StudentID_ModuleCode"
-            />
-          </label>
-        </div>
+        <label style="display: block; margin: 6px 0">
+          Assignment ID
+          <input id="d_assgn" type="text" placeholder="StudentID_ModuleCode" />
+        </label>
 
         <div class="actions">
           <button id="declCancel" class="btn">Cancel</button>
