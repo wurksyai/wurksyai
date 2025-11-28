@@ -261,7 +261,7 @@ async function loadPdfIntoViewer(url) {
   _pageNum = 1;
   pageInfo.textContent = `1 / ${_pdfDoc.numPages}`;
   await renderPage(_pageNum);
-  setStatus("Idle");
+  setStatus("");
 }
 async function renderPage(num) {
   if (!_pdfDoc) return;
@@ -323,7 +323,7 @@ async function loadForViewing(it) {
       const text = await extractPdfFromUrl(pdf);
       lastExtractedText = text || "";
       pdfTextEl.textContent = lastExtractedText || "(no text extracted)";
-      setStatus("Idle");
+      setStatus("");
       return;
     }
   } catch {}
