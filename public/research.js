@@ -453,11 +453,30 @@ import("/harvard_uol.js").then(({ formatHarvardUoL }) => {
     bibEl.innerHTML = "";
     bibliography.forEach((line, i) => {
       const li = document.createElement("li");
-      li.className = "list-item";
-      li.textContent = `${i + 1}. ${line}`;
+      li.className = "list-item bib-entry";
+
+      const text = document.createElement("span");
+      text.className = "bib-entry-text";
+      text.textContent = `${i + 1}. ${line}`;
+
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "bib-remove";
+      removeBtn.setAttribute("aria-label", "Remove citation");
+      removeBtn.textContent = "−";
+      removeBtn.addEventListener("click", () => {
+        bibliography.splice(i, 1);
+        renderBib();
+      });
+
+      li.append(text, removeBtn);
       bibEl.appendChild(li);
     });
+    
+    copyBibBtn.style.display = bibliography.length ? "inline-flex" : "none";
   }
+  
+  renderBib();
 });
 
 // ---------- Wurksy Q&A ----------

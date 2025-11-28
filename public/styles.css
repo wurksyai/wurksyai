@@ -141,7 +141,7 @@ p { margin: 8px 0; }
 .assignment-layout {
   display: flex;
   flex-direction: column;
-  /* gap: 20px; */
+  /* gap: 14px; */
   margin-bottom: 8px;
 }
 
@@ -202,6 +202,23 @@ p { margin: 8px 0; }
 #assignmentBrief {
   max-height: 260px !important;
   font-size: 13px;
+}
+
+/* Assignment brief card styling */
+#assignmentCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-self: stretch;
+}
+
+.brief-bubble {
+  padding: 12px 14px;
+  background: color-mix(in hsl, var(--card) 92%, transparent);
+  border: 1px solid color-mix(in hsl, var(--border) 86%, transparent);
+  border-radius: 12px;
+  color: var(--text);
+  line-height: 1.55;
 }
 
 /* ---------------------------
@@ -277,6 +294,20 @@ button.primary {
 .list-item:hover { background: var(--surface-2); }
 .list-item.active { background: color-mix(in hsl, var(--accent) 12%, transparent); }
 
+.bib-entry { display: flex; align-items: center; gap: 10px; }
+.bib-entry-text { flex: 1; }
+.bib-remove {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* ---------------------------
    Lectures Viewer & Chat
    --------------------------- */
@@ -308,13 +339,18 @@ mark.__hit {
 }
 
 /* Chat panel */
-.chat-wrap { padding: 16px; }
-.chat-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px; }
+.chat-wrap {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.chat-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:2px; }
 .cap { font-size: 12px; }
-#msgs { 
-  list-style:none; padding:0; margin:12px 0; 
-  display:flex; flex-direction:column; gap:8px; 
-  max-height:55vh; overflow:auto; 
+#msgs {
+  list-style:none; padding:0; margin:6px 0 4px;
+  display:flex; flex-direction:column; gap:8px;
+  max-height:55vh; overflow:auto;
 }
 #msgs li { padding:10px 12px; border-radius:10px; border:1px solid var(--border); }
 #msgs li.user { background: rgba(34,211,238,.08); }
@@ -378,14 +414,15 @@ mark.__hit {
 .slogan-under { margin: 0 0 6px; font-size: 14px; color: var(--muted); }
 .subtitle { color: var(--muted); margin-top: 8px; font-size: 14px; max-width: 56ch; }
 
-.badge { 
-  display:inline-flex; 
-  align-items:center; 
-  gap:8px; 
-  padding:6px 10px; 
-  border-radius:999px; 
-  border:1px solid var(--border); 
-  background: color-mix(in hsl, var(--card) 90%, transparent); 
-  font-size: 12px; 
+  .badge {
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background: color-mix(in hsl, var(--card) 90%, transparent);
+    font-size: 12px;
+    width: fit-content;
 }
 
